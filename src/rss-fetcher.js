@@ -8,26 +8,30 @@ const parser = new Parser();
  * @return {object} A stripped down version of the feed & items from the RSS feed
  */
 const rssFetcher = async (feedURL) => {
-	const feed = await parser.parseURL(feedURL);
+	try {
+		const feed = await parser.parseURL(feedURL);
 
-	const channel = {};
-	channel["title"] = feed.title;
-	channel["description"] = feed.description;
-	channel["link"] = feed.link;
-	channel["feedURL"] = feed.feedURL ?? feedURL;
-	channel["imageURL"] = feed.image?.url;
+		const channel = {};
+		channel["title"] = feed.title;
+		channel["description"] = feed.description;
+		channel["link"] = feed.link;
+		channel["feedURL"] = feed.feedURL ?? feedURL;
+		channel["imageURL"] = feed.image?.url;
 
-	const items = feed.items.map((_item) => {
-		const item = {};
-		item["guid"] = _item.guid ?? item.id ?? item.link;
-		item["title"] = (_item.title ?? _item.contentSnippet ?? "Untitled").substr(0, 160);
-		item["content"] = _item.content;
-		item["textContent"] = _item.contentSnippet;
-		item["author"] = _item.author;
-		item["publishedOn"] = new Date(_item.isoDate);
-		return item;
-	});
-	return { channel, items };
+		const items = feed.items.map((_item) => {
+			const item = {};
+			item["guid"] = _item.guid ?? item.id ?? item.link;
+			item["title"] = (_item.title ?? _item.contentSnippet ?? "Untitled").substr(0, 160);
+			item["content"] = _item.content;
+			item["textContent"] = _item.contentSnippet;
+			item["author"] = _item.author;
+			item["publishedOn"] = new Date(_item.isoDate);
+			return item;
+		});
+		return { success: true, channel, items };
+	} catch (err) {
+		return { success: false, error: err.message };
+	}
 };
 
 module.exports = rssFetcher;

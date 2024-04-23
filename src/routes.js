@@ -8,7 +8,7 @@ const uuid = require("uuid").v4;
 
 const config = require("./config");
 const model = require("./model");
-const userUtils = require("./user-utils");
+const utils = require("./utils");
 
 // const upload = multer({ storage: multer.memoryStorage() });
 
@@ -47,14 +47,14 @@ router.get("/csrf.js", async (req, res) => {
 	res.send(`window.CSRF_TOKEN="${csrfToken}"`);
 });
 
-router.use(userUtils.csrfValidator);
+router.use(utils.csrfValidator);
 
-router.post("/signup", userUtils.rateLimit({ windowMs: 30, max: 2, skipFailedRequests: true }), model.signUp);
-router.post("/login", userUtils.rateLimit({ max: 5 }), model.logIn);
-router.post("/reset", userUtils.rateLimit({ max: 5 }), model.resetPassword);
+router.post("/signup", utils.rateLimit({ windowMs: 30, max: 2, skipFailedRequests: true }), model.signUp);
+router.post("/login", utils.rateLimit({ max: 5 }), model.logIn);
+router.post("/reset", utils.rateLimit({ max: 5 }), model.resetPassword);
 
-router.use(userUtils.attachUsertoRequest);
-router.use(userUtils.isUserAuthed);
+router.use(utils.attachUsertoRequest);
+router.use(utils.isUserAuthed);
 
 router.put("/account", model.updateAccount);
 router.post("/logout", model.logOut);
@@ -70,7 +70,7 @@ router.get("/me", model.me);
 
 // router.post(
 // 	"/import",
-// 	userUtils.rateLimit({ windowMs: 60, max: 5, skipFailedRequests: true }),
+// 	utils.rateLimit({ windowMs: 60, max: 5, skipFailedRequests: true }),
 // 	upload.single("bookmarks"),
 // 	model.importBookmarks
 // );

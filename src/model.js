@@ -2,16 +2,16 @@ const randomString = require("randomstring");
 const uuid = require("uuid").v4;
 
 const config = require("./config");
-const userUtils = require("./user-utils");
+const utils = require("./utils");
 const sendEmail = require("./email");
 
 const { Users } = require("./collections").getInstance();
 
 const signUp = async (req, res, next) => {
 	try {
-		const email = userUtils.getValidEmail(req.body.email);
-		await userUtils.isNewEmail(email);
-		const password = userUtils.getValidPassword(req.body.password);
+		const email = utils.getValidEmail(req.body.email);
+		await utils.isNewEmail(email);
+		const password = utils.getValidPassword(req.body.password);
 		const date = new Date();
 
 		const emailVerificationCode = uuid();
@@ -36,12 +36,12 @@ const signUp = async (req, res, next) => {
 
 const logIn = async (req, res, next) => {
 	try {
-		const email = userUtils.getValidEmail(req.body.email);
-		const password = userUtils.getValidPassword(req.body.password);
+		const email = utils.getValidEmail(req.body.email);
+		const password = utils.getValidPassword(req.body.password);
 
 		const user = await Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") }, password }).exec();
 
-		if (!user) return userUtils.httpError(400, "Invalid user credentials");
+		if (!user) return utils.httpError(400, "Invalid user credentials");
 
 		const userAgent = req.get("user-agent");
 
@@ -77,10 +77,10 @@ const resetPassword = async (req, res, next) => {
 		const email = req.body.email;
 
 		const channel = await Users.findOne({ email }).exec();
-		if (!channel) return userUtils.httpError(400, "Invalid Email");
+		if (!channel) return utils.httpError(400, "Invalid Email");
 
 		const passwordString = randomString.generate(8);
-		const password = await userUtils.getValidPassword(passwordString);
+		const password = await utils.getValidPassword(passwordString);
 
 		await Users.updateOne({ _id: channel._id }, { password, lastUpdatedOn: new Date() });
 		await sendEmail.resetPasswordEmail(channel.email, passwordString);
@@ -110,12 +110,12 @@ const me = async (req, res, next) => {
 const updateAccount = async (req, res, next) => {
 	try {
 		const email =
-			req.body.email && req.body.email !== req.user.email ? await userUtils.getValidEmail(req.body.email) : null;
-		if (email) await userUtils.isNewEmail(email, req.user._id);
+			req.body.email && req.body.email !== req.user.email ? await utils.getValidEmail(req.body.email) : null;
+		if (email) await utils.isNewEmail(email, req.user._id);
 
-		const password = req.body.password ? await userUtils.getValidPassword(req.body.password) : null;
+		const password = req.body.password ? await utils.getValidPassword(req.body.password) : null;
 
-		const defaultTags = req.body.defaultTags ? userUtils.getValidTags(req.body.defaultTags) : [];
+		const defaultTags = req.body.defaultTags ? utils.getValidTags(req.body.defaultTags) : [];
 
 		const updateFields = { defaultTags };
 		if (password) updateFields["password"] = password;

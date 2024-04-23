@@ -47,7 +47,6 @@ const resetPasswordEmail = (email, password) => {
 };
 
 const sendEmail = async (params) => {
-	console.log(params);
 	const client = new SESClient({
 		region: "us-west-2",
 		credentials: {
