@@ -1,0 +1,21 @@
+# dotenv
+.env
+
+# git folder
+.git
+
+# NPM
+node_modules
+npm-debug.log
+
+# Testing
+.nyc_output
+
+# Mac
+.DS_Store
+
+# Cache
+.cache
+
+# build folder
+dist
