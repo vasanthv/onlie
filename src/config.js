@@ -6,7 +6,7 @@ module.exports = {
 	MONGODB_URI: process.env.MONGODB_URI || "mongodb://localhost:27017/onlie-dev",
 	DISABLE_CSRF: process.env.DISABLE_CSRF,
 	CSRF_TOKEN_EXPIRY: 60 * 30, // 30 mins
-	SECRET: process.env.SECRET ?? "",
+	SECRET: process.env.SECRET ?? "some-secret",
 	AWS_ACCESS_KEY: process.env.AWS_ACCESS_KEY_ID,
 	AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
 	INVALID_HANDLES: ["administrator", "admin", "bot", "onlie"],

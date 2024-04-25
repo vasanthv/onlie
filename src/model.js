@@ -4,8 +4,9 @@ const uuid = require("uuid").v4;
 const config = require("./config");
 const utils = require("./utils");
 const sendEmail = require("./email");
+const rssFetcher = require("./rss-fetcher");
 
-const { Users } = require("./collections").getInstance();
+const { Users, Channels, Items } = require("./collections").getInstance();
 
 const signUp = async (req, res, next) => {
 	try {
@@ -138,6 +139,40 @@ const updateAccount = async (req, res, next) => {
 
 const subscribeChannel = async (req, res, next) => {
 	try {
+		let feedURL = utils.getValidURL(req.body.url);
+		const date = new Date();
+
+		let rssData = await rssFetcher(feedURL);
+
+		if (rssData.error) {
+			feedURL = await utils.findFeedURL(feedURL);
+			if (!feedURL) {
+				return utils.httpError(400, rssData.error);
+			}
+			rssData = await rssFetcher(feedURL);
+		}
+
+		if (rssData.error) {
+			return utils.httpError(400, rssData.error);
+		}
+
+		let channel = await Channels.findOne({ link: rssData.channel.link }).exec();
+		if (!channel) {
+			channel = await new Channels({ ...rssData.channel, createdOn: date, lastFetchedOn: date }).save();
+		}
+
+		res.json({ channel });
+
+		try {
+			const itemUpserts = rssData.items.map((item) => {
+				return Items.findOneAndUpdate(
+					{ guid: item.guid },
+					{ channel: channel._id, ...item, fetchedOn: date },
+					{ new: true, upsert: true }
+				);
+			});
+			await Promise.all(itemUpserts);
+		} catch (err) {}
 	} catch (error) {
 		next(error);
 	}

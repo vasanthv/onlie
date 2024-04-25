@@ -18,9 +18,10 @@ const rssFetcher = async (feedURL) => {
 		channel["feedURL"] = feed.feedURL ?? feedURL;
 		channel["imageURL"] = feed.image?.url;
 
-		const items = feed.items.map((_item) => {
+		const items = feed.items.slice(0, 100).map((_item) => {
 			const item = {};
-			item["guid"] = _item.guid ?? item.id ?? item.link;
+			item["guid"] = _item.guid ?? _item.id ?? _item.link;
+			item["link"] = _item.link;
 			item["title"] = (_item.title ?? _item.contentSnippet ?? "Untitled").substr(0, 160);
 			item["content"] = _item.content;
 			item["textContent"] = _item.contentSnippet;

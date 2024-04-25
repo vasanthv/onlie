@@ -195,7 +195,7 @@ const findFeedURL = async (url) => {
 };
 
 /**
- * Returns the contents of the URL
+ * Returns the contents of an URL
  * @param  {string} url - URL to be fetched
  * @return {} Contents of the URL.
  */

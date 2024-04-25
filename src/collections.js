@@ -40,7 +40,6 @@ module.exports = (() => {
 			lastUpdatedOn: Date,
 			token: [{ type: String, index: true }],
 			membershipType: { type: String, enum: ["FREE", "PRO"], default: "FREE" },
-			channels: [{ type: Schema.Types.ObjectId, ref: "Channels", index: true }],
 		});
 
 		const channelSchema = new Schema({
@@ -52,19 +51,21 @@ module.exports = (() => {
 			createdOn: { type: Date, default: Date.now },
 			lastFetchedOn: Date, // Last successful fetch of the RSS feed
 			fetchIntervalInMinutes: { type: Number, default: 30 },
+			subscribers: [{ type: Schema.Types.ObjectId, ref: "Users", index: true }],
 		});
 
 		const itemSchema = new Schema({
-			guid: { type: String, index: true, required: true },
+			guid: { type: String, index: true, required: true, unique: true },
 			channel: { type: Schema.Types.ObjectId, ref: "Channels", index: true },
 			title: String,
+			link: String,
 			content: String,
 			textContent: String,
 			author: String,
 			publishedOn: Date,
 			fetchedOn: Date,
 		});
-		itemSchema.index({ title: "text", description: "textContent" });
+		itemSchema.index({ title: "text", textContent: "text" });
 
 		const Users = mongoose.model("Users", userSchema);
 		const Channels = mongoose.model("Channels", channelSchema);
