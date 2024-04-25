@@ -161,7 +161,9 @@ const subscribeChannel = async (req, res, next) => {
 			channel = await new Channels({ ...rssData.channel, createdOn: date, lastFetchedOn: date }).save();
 		}
 
-		res.json({ channel });
+		await Channels.updateOne({ _id: channel._id }, { subscribers: { $push: req.user._id } });
+
+		res.json({ message: "Channel subscribed" });
 
 		try {
 			const itemUpserts = rssData.items.map((item) => {
