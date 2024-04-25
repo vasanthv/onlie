@@ -182,26 +182,16 @@ const subscribeChannel = async (req, res, next) => {
 
 const unsubscribeChannel = async (req, res, next) => {
 	try {
+		let feedURL = utils.getValidURL(req.body.url);
+		await Channels.updateOne({ feedURL }, { subscribers: { $pull: req.user._id } });
+
+		res.json({ message: "Channel unsubscribed" });
 	} catch (error) {
 		next(error);
 	}
 };
 
 const getItems = async (req, res, next) => {
-	try {
-	} catch (error) {
-		next(error);
-	}
-};
-
-const favouriteItem = async (req, res, next) => {
-	try {
-	} catch (error) {
-		next(error);
-	}
-};
-
-const unfavouriteItem = async (req, res, next) => {
 	try {
 	} catch (error) {
 		next(error);
@@ -228,7 +218,5 @@ module.exports = {
 	subscribeChannel,
 	unsubscribeChannel,
 	getItems,
-	favouriteItem,
-	unfavouriteItem,
 	logOut,
 };

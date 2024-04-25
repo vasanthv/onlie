@@ -62,6 +62,7 @@ router.post("/logout", model.logOut);
 router.get("/me", model.me);
 
 router.post("/channel/subscribe", model.subscribeChannel);
+router.post("/channel/unsubscribe", model.unsubscribeChannel);
 
 // router.post("/bookmarks", model.addBookmark);
 // router.put("/bookmarks/:id", model.updateBookmark);
