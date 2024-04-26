@@ -193,6 +193,23 @@ const unsubscribeChannel = async (req, res, next) => {
 
 const getItems = async (req, res, next) => {
 	try {
+		const channelIds = await Channels.find({ subscribers: req.user._id }).select("_id").exec();
+
+		const skip = Number(req.query.skip) || 0;
+		const searchString = req.query.query;
+
+		let query = { channel: { $in: channelIds.map((c) => c._id) } };
+		if (searchString) query["$text"] = { $search: searchString };
+
+		const items = await Items.find(query)
+			.select("guid channel title link content textContent author publishedOn")
+			.populate("channel", "link feedURL title description imageURL createdOn")
+			.skip(skip)
+			.limit(50)
+			.sort("-publishedOn")
+			.exec();
+
+		res.json({ items });
 	} catch (error) {
 		next(error);
 	}
