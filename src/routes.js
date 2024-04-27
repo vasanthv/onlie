@@ -58,9 +58,10 @@ router.post("/logout", model.logOut);
 
 router.get("/me", model.me);
 
+router.get("/channels", model.getChannels);
 router.post("/channel/subscribe", model.subscribeChannel);
 router.post("/channel/unsubscribe", model.unsubscribeChannel);
-router.post("/items", model.getItems);
+router.get("/items", model.getItems);
 
 /**
  * API endpoints common error handling middleware
