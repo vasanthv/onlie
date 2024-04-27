@@ -50,7 +50,7 @@ module.exports = (() => {
 			imageURL: String,
 			createdOn: { type: Date, default: Date.now },
 			lastFetchedOn: Date, // Last successful fetch of the RSS feed
-			fetchIntervalInMinutes: { type: Number, default: 30 },
+			fetchIntervalInMinutes: { type: Number, default: 60 },
 			subscribers: [{ type: Schema.Types.ObjectId, ref: "Users", index: true }],
 		});
 

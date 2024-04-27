@@ -1,7 +1,6 @@
 const randomString = require("randomstring");
 const uuid = require("uuid").v4;
 
-const config = require("./config");
 const utils = require("./utils");
 const sendEmail = require("./email");
 const rssFetcher = require("./rss-fetcher");
@@ -169,10 +168,10 @@ const subscribeChannel = async (req, res, next) => {
 
 		let channel = await Channels.findOne({ link: rssData.channel.link }).exec();
 		if (!channel) {
-			channel = await new Channels({ ...rssData.channel, createdOn: date, lastFetchedOn: date }).save();
+			channel = await new Channels({ ...rssData.channel, createdOn: date }).save();
 		}
 
-		await Channels.updateOne({ _id: channel._id }, { $push: { subscribers: req.user._id } });
+		await Channels.updateOne({ _id: channel._id }, { $push: { subscribers: req.user._id }, lastFetchedOn: date });
 
 		res.json({ message: "Channel subscribed" });
 

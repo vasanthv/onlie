@@ -13,6 +13,7 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const config = require("./src/config");
 const apiRoutes = require("./src/routes");
+const { initAllChannelsFetch: initScheduler } = require("./src/scheduler");
 
 // Set the view engine
 app.set("view engine", "ejs");
@@ -43,3 +44,6 @@ app.listen(config.PORT, null, function () {
 	console.log("Node version", process.version);
 	console.log("Webtag server running on port", config.PORT);
 });
+
+// Initialize the scheduler for every channel to fetch on a regular interval
+initScheduler();
