@@ -1,0 +1,35 @@
+{
+	"name": "Webtag",
+	"short_name": "Webtag",
+	"description": "A free bookmarking website.",
+	"icons": [
+		{
+			"src": "icon.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "icon-maskable.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		},
+		{
+			"src": "favicon.svg",
+			"sizes": "any"
+		}
+	],
+	"theme_color": "#f22952",
+	"background_color": "#fff",
+	"display": "standalone",
+	"start_url": "/",
+	"permissions": ["notifications"],
+	"share_target": {
+		"action": "/bookmark",
+		"method": "GET",
+		"params": {
+			"url": "url"
+		}
+	}
+}

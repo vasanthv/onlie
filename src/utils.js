@@ -163,7 +163,7 @@ const speedLimiter = slowDown({
  * @return {Promise<string>} A promise which resolves to email
  */
 const isNewEmail = async (email, currentUserId) => {
-	let query = { email };
+	let query = { email: { $regex: new RegExp(`^${email}$`, "i") } };
 	if (currentUserId) {
 		query["_id"] = { $ne: currentUserId };
 	}

@@ -19,3 +19,7 @@ npm-debug.log
 
 # build folder
 dist
+
+# sublime
+*.sublime-project
+*.sublime-workspace

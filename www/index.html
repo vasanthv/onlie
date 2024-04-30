@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="Cache-control" content="public" />
+		<meta
+			name="viewport"
+			content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover"
+		/>
+		<meta name="description" content="Read all your news, social media & blogs in a single feed." />
+		<meta name="keywords" content="news reader, rss reader, atom reader" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<!-- Icons & Theme-->
+		<meta name="theme-color" content="#fff" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="mask-icon" href="/mask-icon.svg" color="#000" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/manifest.json" />
+
+		<!-- Meta data for link fetching -->
+		<meta property="og:url" content="https://onlie.io" />
+		<meta property="og:image" content="https://onlie.io/banner.png" />
+		<meta property="og:title" content="Onlie" />
+		<meta property="og:description" content="RSS reader for the web." />
+		<title>Onlie - Read all your news, social media & blogs in a single feed.</title>
+		<!-- Site scripts & styles -->
+		<link href="/style.css" rel="stylesheet" />
+
+		<script defer src="/vue.global.prod.js"></script>
+		<script defer src="/axios.min.js"></script>
+		<script defer src="/page.js"></script>
+		<script defer src="/api/csrf.js"></script>
+		<script defer src="/script.js"></script>
+	</head>
+	<body>
+		<div id="app">
+			<div id="app-containter" class="wrap" v-bind:style="'visibility:visible;'">
+				<section id="toast" v-bind:class="toast.type + (toast.message ? ' show' : '')" v-on:click="toast.message = ''">
+					{{toast.message}}
+				</section>
+
+				<section class="page" v-if="page === 'intro'">
+					<nav>&nbsp;</nav>
+					<h1 class="page-title">Onlie</h1>
+					<h2>Read all your news, social media & blogs in a single feed.</h2>
+
+					<h3>Just pay $1/Month.</h3>
+
+					<div><a href="/signup" class="bold">Create free account</a></div>
+					<br />
+					<div>Already have an account? <a href="/login">Log in</a></div>
+				</section>
+
+				<main v-if="page !== 'intro'">
+					<nav>
+						<a href="/">Home</a>
+						<span class="separator">&middot;</span>
+						<a href="/signup" v-if="!isloggedIn">Sign up</a>
+						<a href="/channels" v-if="isloggedIn">Channels</a>
+						<span class="separator">&middot;</span>
+						<a href="/login" v-if="!isloggedIn">Log in</a>
+						<a href="/account" v-if="isloggedIn">Account</a>
+					</nav>
+
+					<section v-if="page === 'signup'">
+						<h1 class="page-title">Create an account</h1>
+						<label for="email">E-mail address</label>
+						<input type="email" id="email" placeholder="Email address" v-model="newAccount.email" />
+						<label for="password">Password</label>
+						<input
+							type="password"
+							id="password"
+							placeholder="Password"
+							v-model="newAccount.password"
+							v-on:keydown.enter="signUp"
+						/>
+						<button class="bold" v-on:click="signUp">Sign up</button>
+						<div class="small light">Already got an account? <a href="/login">Log in</a></div>
+					</section>
+
+					<section v-if="page === 'login'">
+						<h1 class="page-title">Log in</h1>
+						<label for="username">Email</label>
+						<input type="text" id="email" placeholder="Enter your email" v-model="authCreds.email" />
+
+						<label for="password">Password</label>
+						<input
+							type="password"
+							id="password"
+							placeholder="Password"
+							v-model="authCreds.password"
+							v-on:keydown.enter="signIn"
+						/>
+						<button class="bold" v-on:click="signIn">Log in</button>
+						<div class="small"><a href="javascript:void(0)" v-on:click="forgotPassword">Forgot password?</a></div>
+						<div class="small light">Don't have an account yet? <a href="/signup">Sign up</a></div>
+					</section>
+
+					<section v-if="page === 'account'">
+						<h1 class="page-title">Your account</h1>
+						<label for="email">Your e-mail address</label>
+						<input type="email" id="email" placeholder="Email address" v-model="myAccount.email" />
+						<label for="password">Password</label>
+						<input type="password" id="password" placeholder="Enter new password" v-model="myAccount.password" />
+
+						<button class="bold" v-on:click="updateAccount">Update account</button>
+						<br /><br />
+						<button class="red" v-on:click="logOut()">Log out</button>
+					</section>
+
+					<section v-if="page === 'home'">
+						<div class="flex space-between" id="searchHeader">
+							<h1 class="page-title flex-1">My bookmarks</h1>
+							<form action="." v-on:submit="searchSubmitHandler">
+								<input
+									type="search"
+									v-model="query"
+									placeholder="Search..."
+									v-on:keydown.enter="search"
+									v-on:search="clearSearch"
+								/>
+							</form>
+						</div>
+						<div class="flex">
+							<div class="flex-1">
+								<h3 v-if="queryTags">Tagged: <span v-html="displayTags(queryTags.split(','))"></span></h3>
+							</div>
+							<div v-if="sortOptions">
+								<label for="sortBy" class="small">Sort by:</label>&nbsp;
+								<select id="sortBy" v-model="sort" v-on:change="setSort">
+									<option
+										v-for="(sortOption, i) in sortOptions"
+										v-bind:key="sortOption.value"
+										v-bind:value="sortOption.value"
+									>
+										{{sortOption.label}}
+									</option>
+								</select>
+							</div>
+						</div>
+						<div v-for="(item, i) in items" v-bind:key="item._id" class="bookmark">
+							<div class="link">
+								<a v-bind:href="item.link" target="_blank" rel="noopener noreferrer">{{item.title}}</a>
+							</div>
+							<!-- <div class="meta light">
+								<span v-if="bookmark.createdBy.username !== username">Shared by @{{bookmark.createdBy.username}}</span>
+								<span v-if="bookmark.createdBy.username !== username"> &middot; </span>
+								<span>{{displayDate(bookmark.createdOn)}}</span>
+								<span> &middot; </span>
+								<span v-if="bookmark.tags.length > 0" v-html="displayTags(bookmark.tags)"></span>
+								<span v-if="bookmark.tags.length > 0"> &middot; </span>
+								<a v-bind:href="'/edit?id='+bookmark._id" v-if="bookmark.createdBy.username === username">edit</a>
+								<a
+									href="javascript:void(0)"
+									v-if="bookmark.createdBy.username !== username"
+									v-on:click="removeMeFromTag(bookmark._id)"
+								>
+									remove
+								</a>
+							</div> -->
+						</div>
+						<p v-if="items.length === 0 && !loading" class="light">No items to show</p>
+						<div v-if="loading" class="loader"></div>
+
+						<button class="link bold" v-on:click="getItems" v-if="showLoadMore">Load more &darr;</button>
+					</section>
+
+					<section v-if="page === 'channels'">
+						<h1 class="page-title">My channels</h1>
+						<div v-for="(channel, i) in channels" v-bind:key="channel._id">
+							<div class="link">
+								<div>({{channel.title}})</div>
+							</div>
+						</div>
+						<p v-if="channels.length === 0 && !loading" class="light">You are not subscribed to any channels</p>
+						<div v-if="loading" class="loader"></div>
+					</section>
+
+					<section v-if="page === '404'">
+						<h1 class="page-title">Page not found</h1>
+						<div>The page you are looking for does not exist.</div>
+						<a href="/">Back to home</a>
+					</section>
+				</main>
+			</div>
+		</div>
+		<footer class="small light wrap">
+			<nav>
+				<a href="https://github.com/vasanthv/onlie" target="_blank">Open source</a>
+				<span class="separator">&middot;</span>
+				<a href="/terms.html" target="_blank">Terms</a>
+				<span class="separator">&middot;</span>
+				<a href="/privacy.html" target="_blank">Privacy</a>
+			</nav>
+		</footer>
+
+		<!-- INSERT_ANALYTICS_SCRIPT -->
+	</body>
+</html>

@@ -26,7 +26,7 @@ const signUp = async (req, res, next) => {
 		}).save();
 		req.session.token = token;
 
-		res.json({ message: "Account created. Please verify your email." });
+		res.json({ message: "Account created. Please verify your email.", email });
 
 		sendEmail.verificationEmail(email, emailVerificationCode);
 	} catch (error) {
@@ -39,16 +39,13 @@ const logIn = async (req, res, next) => {
 		const email = utils.getValidEmail(req.body.email);
 		const password = utils.getValidPassword(req.body.password);
 
-		const user = await Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") }, password }).exec();
+		const user = await Users.findOne({ email, password }).exec();
 
 		if (!user) return utils.httpError(400, "Invalid user credentials");
 
-		const userAgent = req.get("user-agent");
-
 		const token = uuid();
-		const devices = { token, userAgent };
 
-		await Users.updateOne({ _id: user._id }, { $push: { devices }, lastLoginAt: new Date() });
+		await Users.updateOne({ _id: user._id }, { $push: { token }, lastLoginAt: new Date() });
 
 		req.session.token = token;
 		res.json({ message: "Logged in", email: user.email });
@@ -93,15 +90,9 @@ const resetPassword = async (req, res, next) => {
 
 const me = async (req, res, next) => {
 	try {
-		const { email, createdOn, apiKeys, defaultTags, devices } = req.user;
+		const { email, createdOn } = req.user;
 
-		res.json({
-			email,
-			createdOn,
-			defaultTags,
-			apiKeys,
-			pushEnabled: devices.some((d) => d.token === req.token && !!d.pushCredentials),
-		});
+		res.json({ email, createdOn });
 	} catch (error) {
 		next(error);
 	}
