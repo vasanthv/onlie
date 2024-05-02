@@ -65,54 +65,51 @@
 
 					<section v-if="page === 'signup'">
 						<h1 class="page-title">Create an account</h1>
-						<label for="email">E-mail address</label>
-						<input type="email" id="email" placeholder="Email address" v-model="newAccount.email" />
-						<label for="password">Password</label>
-						<input
-							type="password"
-							id="password"
-							placeholder="Password"
-							v-model="newAccount.password"
-							v-on:keydown.enter="signUp"
-						/>
-						<button class="bold" v-on:click="signUp">Sign up</button>
+						<form action="." v-on:submit="signUp">
+							<label for="username">Username</label>
+							<input type="text" id="username" placeholder="Username" v-model="newAccount.username" />
+							<label for="email">E-mail address</label>
+							<input type="email" id="email" placeholder="Email address" v-model="newAccount.email" />
+							<label for="password">Password</label>
+							<input type="password" id="password" placeholder="Password" v-model="newAccount.password" />
+							<button class="bold" v-on:click="signUp">Sign up</button>
+						</form>
 						<div class="small light">Already got an account? <a href="/login">Log in</a></div>
 					</section>
 
 					<section v-if="page === 'login'">
 						<h1 class="page-title">Log in</h1>
-						<label for="username">Email</label>
-						<input type="text" id="email" placeholder="Enter your email" v-model="authCreds.email" />
-
-						<label for="password">Password</label>
-						<input
-							type="password"
-							id="password"
-							placeholder="Password"
-							v-model="authCreds.password"
-							v-on:keydown.enter="signIn"
-						/>
-						<button class="bold" v-on:click="signIn">Log in</button>
+						<form action="." v-on:submit="signIn">
+							<label for="username">Username</label>
+							<input type="text" id="username" placeholder="Enter your username" v-model="authCreds.username" />
+							<label for="password">Password</label>
+							<input type="password" id="password" placeholder="Password" v-model="authCreds.password" />
+							<button class="bold" v-on:click="signIn">Log in</button>
+						</form>
 						<div class="small"><a href="javascript:void(0)" v-on:click="forgotPassword">Forgot password?</a></div>
 						<div class="small light">Don't have an account yet? <a href="/signup">Sign up</a></div>
 					</section>
 
 					<section v-if="page === 'account'">
 						<h1 class="page-title">Your account</h1>
-						<label for="email">Your e-mail address</label>
-						<input type="email" id="email" placeholder="Email address" v-model="myAccount.email" />
-						<label for="password">Password</label>
-						<input type="password" id="password" placeholder="Enter new password" v-model="myAccount.password" />
+						<form action="." v-on:submit="updateAccount">
+							<label for="username">Your username</label>
+							<input type="text" id="username" placeholder="Username" v-model="myAccount.username" />
+							<label for="email">Your e-mail address</label>
+							<input type="email" id="email" placeholder="Email address" v-model="myAccount.email" />
+							<label for="password">Password</label>
+							<input type="password" id="password" placeholder="Enter new password" v-model="myAccount.password" />
 
-						<button class="bold" v-on:click="updateAccount">Update account</button>
-						<br /><br />
-						<button class="red" v-on:click="logOut()">Log out</button>
+							<button class="bold" v-on:click="updateAccount">Update account</button>
+							<br /><br />
+							<button class="red" v-on:click="logOut()">Log out</button>
+						</form>
 					</section>
 
 					<section v-if="page === 'home'">
 						<div class="flex space-between" id="searchHeader">
 							<h1 class="page-title flex-1">My bookmarks</h1>
-							<form action="." v-on:submit="searchSubmitHandler">
+							<form action="." v-on:submit="submitHandler">
 								<input
 									type="search"
 									v-model="query"
@@ -122,43 +119,17 @@
 								/>
 							</form>
 						</div>
-						<div class="flex">
-							<div class="flex-1">
-								<h3 v-if="queryTags">Tagged: <span v-html="displayTags(queryTags.split(','))"></span></h3>
-							</div>
-							<div v-if="sortOptions">
-								<label for="sortBy" class="small">Sort by:</label>&nbsp;
-								<select id="sortBy" v-model="sort" v-on:change="setSort">
-									<option
-										v-for="(sortOption, i) in sortOptions"
-										v-bind:key="sortOption.value"
-										v-bind:value="sortOption.value"
-									>
-										{{sortOption.label}}
-									</option>
-								</select>
-							</div>
-						</div>
+
 						<div v-for="(item, i) in items" v-bind:key="item._id" class="bookmark">
 							<div class="link">
 								<a v-bind:href="item.link" target="_blank" rel="noopener noreferrer">{{item.title}}</a>
 							</div>
-							<!-- <div class="meta light">
-								<span v-if="bookmark.createdBy.username !== username">Shared by @{{bookmark.createdBy.username}}</span>
-								<span v-if="bookmark.createdBy.username !== username"> &middot; </span>
-								<span>{{displayDate(bookmark.createdOn)}}</span>
+							<div class="meta light">
+								<img v-if="item.channel.imageURL" v-bind:src="item.channel.imageURL" v-bind:alt="item.channel.title" />
+								<span>{{item.channel.title}}</span>
 								<span> &middot; </span>
-								<span v-if="bookmark.tags.length > 0" v-html="displayTags(bookmark.tags)"></span>
-								<span v-if="bookmark.tags.length > 0"> &middot; </span>
-								<a v-bind:href="'/edit?id='+bookmark._id" v-if="bookmark.createdBy.username === username">edit</a>
-								<a
-									href="javascript:void(0)"
-									v-if="bookmark.createdBy.username !== username"
-									v-on:click="removeMeFromTag(bookmark._id)"
-								>
-									remove
-								</a>
-							</div> -->
+								<span>{{displayDate(item.publishedOn)}}</span>
+							</div>
 						</div>
 						<p v-if="items.length === 0 && !loading" class="light">No items to show</p>
 						<div v-if="loading" class="loader"></div>
@@ -168,9 +139,17 @@
 
 					<section v-if="page === 'channels'">
 						<h1 class="page-title">My channels</h1>
+						<div>
+							<form action="." v-on:submit="subscribeChannel">
+								<input type="url" v-model="newChannel" placeholder="Enter feed URL" />
+							</form>
+						</div>
 						<div v-for="(channel, i) in channels" v-bind:key="channel._id">
 							<div class="link">
-								<div>({{channel.title}})</div>
+								<div>
+									({{channel.title}})
+									<button v-on:click="unsubscribeChannel(channel._id)">Remove</button>
+								</div>
 							</div>
 						</div>
 						<p v-if="channels.length === 0 && !loading" class="light">You are not subscribed to any channels</p>

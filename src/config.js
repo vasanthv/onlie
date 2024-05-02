@@ -12,11 +12,4 @@ module.exports = {
 	INVALID_HANDLES: ["administrator", "admin", "bot", "onlie"],
 	NO_REPLY_EMAIL: process.env.NO_REPLY_EMAIL ?? "Onlie <noreply@email.onlie.io>",
 	CONTACT_EMAIL: process.env.CONTACT_EMAIL ?? "hello@onlie.io",
-	PUSH_OPTIONS: {
-		vapidDetails: {
-			subject: `mailto:${process.env.CONTACT_EMAIL ?? "hello@onlie.io"}`,
-			publicKey: process.env.VAPID_PUBLIC_KEY,
-			privateKey: process.env.VAPID_PRIVATE_KEY,
-		},
-	},
 };

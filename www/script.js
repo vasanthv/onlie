@@ -1,10 +1,8 @@
 /* global page, axios, Vue, cabin */
 
-let swReg = null;
-
 const initApp = async () => {
 	if ("serviceWorker" in navigator) {
-		swReg = await navigator.serviceWorker.register("/sw.js");
+		await navigator.serviceWorker.register("/sw.js");
 	}
 };
 
@@ -15,13 +13,13 @@ const defaultState = function () {
 		visible: document.visibilityState === "visible",
 		loading: true,
 		page: "",
-		newAccount: { email: "", password: "" },
-		authCreds: { email: "", password: "" },
+		newAccount: { username: "", email: "", password: "" },
+		authCreds: { username: "", password: "" },
 		toast: [{ type: "", message: "" }],
-		me: { email: "", password: "" },
+		me: { username: "", email: "", password: "" },
 		myAccount: {},
 		newChannel: "",
-		email: window.localStorage.email,
+		username: window.localStorage.username,
 		channels: [],
 		items: [],
 		query: searchParams.get("q"),
@@ -35,7 +33,7 @@ const App = Vue.createApp({
 	},
 	computed: {
 		isloggedIn() {
-			return !!this.email;
+			return !!this.username;
 		},
 	},
 	methods: {
@@ -60,15 +58,17 @@ const App = Vue.createApp({
 		userEvent(event) {
 			if (cabin) cabin.event(event);
 		},
-		signUp() {
-			if (!this.newAccount.email || !this.newAccount.password) {
+		signUp(e) {
+			this.submitHandler(e);
+			if (!this.newAccount.username || !this.newAccount.email || !this.newAccount.password) {
 				return this.setToast("All fields are mandatory");
 			}
 			axios.post("/api/signup", this.newAccount).then(this.authenticate);
 			this.userEvent("signup");
 		},
-		signIn() {
-			if (!this.authCreds.email || !this.authCreds.password) {
+		signIn(e) {
+			this.submitHandler(e);
+			if (!this.authCreds.username || !this.authCreds.password) {
 				return this.setToast("Please enter valid details");
 			}
 			axios.post("/api/login", this.authCreds).then(this.authenticate);
@@ -83,22 +83,23 @@ const App = Vue.createApp({
 			});
 		},
 		authenticate(response) {
-			window.localStorage.email = this.email = response.data.email;
-			this.newAccount = { email: "", password: "" };
-			this.authCreds = { email: "", password: "" };
+			window.localStorage.username = this.username = response.data.username;
+			this.newAccount = { username: "", email: "", password: "" };
+			this.authCreds = { username: "", password: "" };
 			page.redirect("/");
 			this.setToast(response.data.message, "success");
 		},
 		getMe(queryParams = "") {
 			axios.get(`/api/me${queryParams}`).then((response) => {
-				window.localStorage.email = this.email = response.data.email;
+				window.localStorage.username = this.username = response.data.username;
 				this.me = { ...this.me, ...response.data };
 				this.myAccount = { ...this.me };
 			});
 		},
-		updateAccount() {
-			const { email, password } = this.myAccount;
-			axios.put("/api/account", { email, password }).then((response) => {
+		updateAccount(e) {
+			this.submitHandler(e);
+			const { username, email, password } = this.myAccount;
+			axios.put("/api/account", { username, email, password }).then((response) => {
 				this.setToast(response.data.message, "success");
 			});
 		},
@@ -131,7 +132,8 @@ const App = Vue.createApp({
 					this.loading = false;
 				});
 		},
-		subscribeChannel() {
+		subscribeChannel(e) {
+			this.submitHandler(e);
 			axios.post("/api/channels/subscribe", { url: this.newChannel }).then((response) => {
 				this.setToast(response.data.message, "success");
 				this.getChannels();
@@ -144,7 +146,7 @@ const App = Vue.createApp({
 				this.getChannels();
 			});
 		},
-		searchSubmitHandler(e) {
+		submitHandler(e) {
 			e.preventDefault();
 			e.stopPropagation();
 		},

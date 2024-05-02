@@ -1,7 +1,7 @@
 {
-	"name": "Webtag",
-	"short_name": "Webtag",
-	"description": "A free bookmarking website.",
+	"name": "Onlie",
+	"short_name": "Onlie",
+	"description": "Read all your news, social media & blogs in a single feed.",
 	"icons": [
 		{
 			"src": "icon.png",

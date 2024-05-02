@@ -21,7 +21,7 @@ module.exports = (() => {
 			console.error("Error in MongoDb connection: " + error);
 			mongoose.disconnect(); // Trigger disconnect on any error
 		});
-		db.on("connected", () => console.log("Webtag DB connected"));
+		db.on("connected", () => console.log("Onlie DB connected"));
 		db.on("disconnected", () => {
 			console.log("MongoDB disconnected!");
 			connectToDb();
@@ -32,6 +32,7 @@ module.exports = (() => {
 		console.log("Onlie DB initialized");
 
 		const userSchema = new Schema({
+			username: { type: String, index: true, required: true, unique: true, match: /^([a-zA-Z0-9]){1,18}$/ },
 			email: { type: String, index: true, unique: true, required: true },
 			password: { type: String, required: true },
 			emailVerificationCode: { type: String, index: true },
@@ -63,7 +64,7 @@ module.exports = (() => {
 			textContent: String,
 			author: String,
 			publishedOn: Date,
-			fetchedOn: Date,
+			fetchedOn: { type: Date, default: Date.now, expires: 30 * 86400 }, // delete 30 days after this item is removed from feed
 		});
 		itemSchema.index({ title: "text", textContent: "text" });
 

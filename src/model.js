@@ -9,6 +9,8 @@ const { Users, Channels, Items } = require("./collections").getInstance();
 
 const signUp = async (req, res, next) => {
 	try {
+		const username = utils.getValidUsername(req.body.username);
+		await utils.isNewUsername(username);
 		const email = utils.getValidEmail(req.body.email);
 		await utils.isNewEmail(email);
 		const password = utils.getValidPassword(req.body.password);
@@ -18,6 +20,7 @@ const signUp = async (req, res, next) => {
 		const token = uuid();
 
 		await new Users({
+			username,
 			email,
 			password,
 			emailVerificationCode,
@@ -26,9 +29,9 @@ const signUp = async (req, res, next) => {
 		}).save();
 		req.session.token = token;
 
-		res.json({ message: "Account created. Please verify your email.", email });
+		res.json({ message: "Account created. Please verify your email.", username });
 
-		sendEmail.verificationEmail(email, emailVerificationCode);
+		sendEmail.verificationEmail(username, email, emailVerificationCode);
 	} catch (error) {
 		next(error);
 	}
@@ -36,10 +39,10 @@ const signUp = async (req, res, next) => {
 
 const logIn = async (req, res, next) => {
 	try {
-		const email = utils.getValidEmail(req.body.email);
+		const username = utils.getValidEmail(req.body.username);
 		const password = utils.getValidPassword(req.body.password);
 
-		const user = await Users.findOne({ email, password }).exec();
+		const user = await Users.findOne({ username, password }).exec();
 
 		if (!user) return utils.httpError(400, "Invalid user credentials");
 
@@ -48,7 +51,7 @@ const logIn = async (req, res, next) => {
 		await Users.updateOne({ _id: user._id }, { $push: { token }, lastLoginAt: new Date() });
 
 		req.session.token = token;
-		res.json({ message: "Logged in", email: user.email });
+		res.json({ message: "Logged in", username: user.username });
 	} catch (error) {
 		next(error);
 	}
@@ -90,9 +93,9 @@ const resetPassword = async (req, res, next) => {
 
 const me = async (req, res, next) => {
 	try {
-		const { email, createdOn } = req.user;
+		const { username, email, createdOn } = req.user;
 
-		res.json({ email, createdOn });
+		res.json({ username, email, createdOn });
 	} catch (error) {
 		next(error);
 	}
@@ -100,22 +103,27 @@ const me = async (req, res, next) => {
 
 const updateAccount = async (req, res, next) => {
 	try {
+		const username =
+			req.body.username && req.body.username !== req.user.username
+				? await utils.getValidUsername(req.body.username)
+				: null;
+		if (username) await utils.isNewUsername(username, req.user._id);
+
 		const email =
 			req.body.email && req.body.email !== req.user.email ? await utils.getValidEmail(req.body.email) : null;
 		if (email) await utils.isNewEmail(email, req.user._id);
 
 		const password = req.body.password ? await utils.getValidPassword(req.body.password) : null;
 
-		const defaultTags = req.body.defaultTags ? utils.getValidTags(req.body.defaultTags) : [];
-
-		const updateFields = { defaultTags };
+		const updateFields = {};
+		if (username) updateFields["username"] = username;
 		if (password) updateFields["password"] = password;
 
 		if (email && email !== req.user.email) {
 			const emailVerificationCode = uuid();
 			updateFields["email"] = email;
 			updateFields["emailVerificationCode"] = emailVerificationCode;
-			await sendEmail.verificationEmail(email, emailVerificationCode);
+			await sendEmail.verificationEmail(req.user.username, email, emailVerificationCode);
 		}
 
 		await Users.updateOne({ _id: req.user._id }, { ...updateFields, lastUpdatedOn: new Date() });
@@ -140,6 +148,10 @@ const getChannels = async (req, res, next) => {
 
 const subscribeChannel = async (req, res, next) => {
 	try {
+		if (req.user.emailVerificationCode) {
+			return res.status(400).json({ message: "Please verify your email." });
+		}
+
 		let feedURL = utils.getValidURL(req.body.url);
 		const date = new Date();
 

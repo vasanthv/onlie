@@ -42,7 +42,7 @@ app.use("/*", (req, res) => res.sendFile(path.join(__dirname, "www/index.html"))
 // Start the server
 app.listen(config.PORT, null, function () {
 	console.log("Node version", process.version);
-	console.log("Webtag server running on port", config.PORT);
+	console.log("Onlie server running on port", config.PORT);
 });
 
 // Initialize the scheduler for every channel to fetch on a regular interval

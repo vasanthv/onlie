@@ -2,12 +2,24 @@ const rateLimiter = require("express-rate-limit");
 const slowDown = require("express-slow-down");
 const crypto = require("crypto");
 const { URL } = require("url");
-const createDOMPurify = require("dompurify");
 const { JSDOM } = require("jsdom");
 const axios = require("axios");
 
 const config = require("./config");
 const { Users } = require("./collections").getInstance();
+
+/**
+ * Returns the username if valid else throws an error using httpError function
+ * @param  {string} email - Username to be validated
+ * @return {string} Valid username
+ */
+const getValidUsername = (username) => {
+	if (!username) return httpError(400, "Invalid username");
+	if (config.INVALID_HANDLES.includes(username.toLowerCase())) return httpError(400, "Invalid username");
+	const usernameRegex = /^([a-zA-Z0-9]){1,18}$/;
+	if (!usernameRegex.test(username)) return httpError(400, "Invalid username. Max. 18 alphanumeric chars.");
+	return username.toLowerCase();
+};
 
 /**
  * Returns the email if valid else throws an error using httpError function
@@ -162,6 +174,22 @@ const speedLimiter = slowDown({
  * @param  {string} currentUserId - Current logged in users' id
  * @return {Promise<string>} A promise which resolves to email
  */
+const isNewUsername = async (username, currentUserId) => {
+	let query = { username: { $regex: new RegExp(`^${username}$`, "i") } };
+	if (currentUserId) {
+		query["_id"] = { $ne: currentUserId };
+	}
+
+	const existingUsername = await Users.findOne(query).select("username").exec();
+	return existingUsername ? httpError(400, "Username already taken") : username;
+};
+
+/**
+ * A database helper function to check if the given email address is registered or not.
+ * @param  {string} email - Email address to be validated.
+ * @param  {string} currentUserId - Current logged in users' id
+ * @return {Promise<string>} A promise which resolves to email
+ */
 const isNewEmail = async (email, currentUserId) => {
 	let query = { email: { $regex: new RegExp(`^${email}$`, "i") } };
 	if (currentUserId) {
@@ -224,11 +252,13 @@ const httpError = (code, message) => {
 };
 
 module.exports = {
+	getValidUsername,
 	getValidEmail,
 	getValidURL,
 	isValidEmail,
 	isValidUrl,
 	getValidPassword,
+	isNewUsername,
 	isNewEmail,
 	hashString,
 	httpError,
