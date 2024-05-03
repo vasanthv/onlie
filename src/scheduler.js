@@ -53,7 +53,7 @@ const initAllChannelsFetch = async () => {
 
 const scheduleChannelFetch = (channel) => {
 	try {
-		const cronInterval = channel.fetchIntervalInMinutes ?? 60;
+		const cronInterval = 0;
 		console.log(`Job scheduled for ${channel.feedURL}, runs every ${cronInterval} minutes`);
 		const updateChannelFeed = async () => {
 			try {
