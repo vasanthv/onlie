@@ -100,6 +100,9 @@
 							<label for="password">Password</label>
 							<input type="password" id="password" placeholder="Enter new password" v-model="myAccount.password" />
 
+							<label for="bio">Bio</label>
+							<textarea id="bio" placeholder="Enter bio" v-model="myAccount.bio"></textarea>
+
 							<button class="bold" v-on:click="updateAccount">Update account</button>
 							<br /><br />
 							<button class="red" v-on:click="logOut()">Log out</button>
@@ -108,8 +111,8 @@
 
 					<section v-if="page === 'home'">
 						<div class="flex space-between" id="searchHeader">
-							<h1 class="page-title flex-1">My bookmarks</h1>
-							<form action="." v-on:submit="submitHandler">
+							<h1 class="page-title flex-1">@{{username}}'s feed</h1>
+							<!-- 							<form action="." v-on:submit="submitHandler">
 								<input
 									type="search"
 									v-model="query"
@@ -117,7 +120,7 @@
 									v-on:keydown.enter="search"
 									v-on:search="clearSearch"
 								/>
-							</form>
+							</form> -->
 						</div>
 
 						<div v-for="(item, i) in items" v-bind:key="item._id" class="bookmark">

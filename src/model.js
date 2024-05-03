@@ -7,6 +7,8 @@ const rssFetcher = require("./rss-fetcher");
 
 const { Users, Channels, Items } = require("./collections").getInstance();
 
+const { scheduleChannelFetch } = require("./scheduler");
+
 const signUp = async (req, res, next) => {
 	try {
 		const username = utils.getValidUsername(req.body.username);
@@ -93,9 +95,9 @@ const resetPassword = async (req, res, next) => {
 
 const me = async (req, res, next) => {
 	try {
-		const { username, email, createdOn } = req.user;
+		const { username, email, bio, createdOn } = req.user;
 
-		res.json({ username, email, createdOn });
+		res.json({ username, email, bio, createdOn });
 	} catch (error) {
 		next(error);
 	}
@@ -115,9 +117,12 @@ const updateAccount = async (req, res, next) => {
 
 		const password = req.body.password ? await utils.getValidPassword(req.body.password) : null;
 
+		const bio = req.body.bio ? req.body.bio.substring(0, 160) : null;
+
 		const updateFields = {};
 		if (username) updateFields["username"] = username;
 		if (password) updateFields["password"] = password;
+		if (bio) updateFields["bio"] = bio;
 
 		if (email && email !== req.user.email) {
 			const emailVerificationCode = uuid();
@@ -130,6 +135,18 @@ const updateAccount = async (req, res, next) => {
 		res.json({
 			message: `Account updated. ${updateFields["emailVerificationCode"] ? "Please verify your email" : ""}`,
 		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+const updateMembership = async (req, res, next) => {
+	try {
+		console.log(req.body);
+		// const channels = await Channels.find({ subscribers: req.user._id })
+		// 	.select("link feedURL title description imageURL")
+		// 	.exec();
+		res.json({});
 	} catch (error) {
 		next(error);
 	}
@@ -172,6 +189,8 @@ const subscribeChannel = async (req, res, next) => {
 		let channel = await Channels.findOne({ link: rssData.channel.link }).exec();
 		if (!channel) {
 			channel = await new Channels({ ...rssData.channel, createdOn: date }).save();
+
+			scheduleChannelFetch(channel);
 		}
 
 		await Channels.updateOne({ _id: channel._id }, { $push: { subscribers: req.user._id }, lastFetchedOn: date });
@@ -245,6 +264,7 @@ module.exports = {
 	resetPassword,
 	me,
 	updateAccount,
+	updateMembership,
 	getChannels,
 	subscribeChannel,
 	unsubscribeChannel,

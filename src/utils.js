@@ -6,7 +6,7 @@ const { JSDOM } = require("jsdom");
 const axios = require("axios");
 
 const config = require("./config");
-const { Users } = require("./collections").getInstance();
+const { Users, Channels } = require("./collections").getInstance();
 
 /**
  * Returns the username if valid else throws an error using httpError function
@@ -116,6 +116,24 @@ const attachUsertoRequest = async (req, res, next) => {
  */
 const isUserAuthed = (req, res, next) => {
 	if (req.user) return next();
+	res.status(401).json({ message: "Please log in" });
+};
+
+/**
+ * This is an Express js middleware to check if the request is authenticated or not.
+ * Calls next when authenticated.
+ * Responds a JSON error response if not authenticated.
+ * @param  {object}   req  - Express.js Request object. https://expressjs.com/en/5x/api.html#req
+ * @param  {[type]}   res  - Express.js Response object. https://expressjs.com/en/5x/api.html#res
+ * @param  {Function} next - Express.js next middleware function https://expressjs.com/en/guide/writing-middleware.html
+ * @return {null}
+ */
+const canUserSubscribe = async (req, res, next) => {
+	if (!req.user) return res.status(401).json({ message: "Please log in" });
+	if (req.user.membershipType === "PRO") return next();
+
+	const channels = await Channels.find({ subscribers: req.user._id }).select("title").exec();
+
 	res.status(401).json({ message: "Please log in" });
 };
 

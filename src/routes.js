@@ -50,6 +50,8 @@ router.post("/signup", utils.rateLimit({ windowMs: 30, max: 2, skipFailedRequest
 router.post("/login", utils.rateLimit({ max: 5 }), model.logIn);
 router.post("/reset", utils.rateLimit({ max: 5 }), model.resetPassword);
 
+router.post("/membership", model.updateMembership);
+
 router.use(utils.attachUsertoRequest);
 router.use(utils.isUserAuthed);
 

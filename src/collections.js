@@ -36,6 +36,7 @@ module.exports = (() => {
 			email: { type: String, index: true, unique: true, required: true },
 			password: { type: String, required: true },
 			emailVerificationCode: { type: String, index: true },
+			bio: String,
 			joinedOn: { type: Date, default: Date.now },
 			lastLoginOn: Date,
 			lastUpdatedOn: Date,
