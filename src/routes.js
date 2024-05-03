@@ -61,7 +61,7 @@ router.post("/logout", model.logOut);
 router.get("/me", model.me);
 
 router.get("/channels", model.getChannels);
-router.post("/channels/subscribe", model.subscribeChannel);
+router.post("/channels/subscribe", utils.canUserSubscribe, model.subscribeChannel);
 router.post("/channels/unsubscribe", model.unsubscribeChannel);
 router.get("/items", model.getItems);
 

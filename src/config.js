@@ -12,4 +12,5 @@ module.exports = {
 	INVALID_HANDLES: ["administrator", "admin", "bot", "onlie"],
 	NO_REPLY_EMAIL: process.env.NO_REPLY_EMAIL ?? "Onlie <noreply@email.onlie.io>",
 	CONTACT_EMAIL: process.env.CONTACT_EMAIL ?? "hello@onlie.io",
+	BMC_SECRET: process.env.BMC_SECRET,
 };

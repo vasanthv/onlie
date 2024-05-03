@@ -8,6 +8,7 @@ const rssFetcher = require("./rss-fetcher");
 const { Users, Channels, Items } = require("./collections").getInstance();
 
 const { scheduleChannelFetch } = require("./scheduler");
+const config = require("./config");
 
 const signUp = async (req, res, next) => {
 	try {
@@ -142,12 +143,28 @@ const updateAccount = async (req, res, next) => {
 
 const updateMembership = async (req, res, next) => {
 	try {
-		console.log(req.body);
-		console.log(req.headers);
-		console.log(req.query);
-		// const channels = await Channels.find({ subscribers: req.user._id })
-		// 	.select("link feedURL title description imageURL")
-		// 	.exec();
+		const userAgent = req.headers["user-agent"];
+		const signature = req.headers["x-signature-sha256"];
+		const type = req.body.type;
+
+		if (userAgent !== "BMC-HTTPS-ROBOT") {
+			return res.json("Invalid user-agent");
+		}
+
+		if (signature !== crypto.createHash("sha256").update(config.BMC_SECRET).digest("hex")) {
+			return res.json("Invalid signature");
+		}
+
+		if (["membership.started", "membership.cancelled"].includes(type)) {
+			const userEmail = req.body.data.supporter_email;
+			const user = await Users.findOne({ email: userEmail }).exec();
+			if (!user) {
+				return res.json("User email not found");
+			}
+			const membershipType = type === "membership.started" ? "PRO" : "FREE";
+			await Users.updateOne({ _id: user._id }, { membershipType, lastUpdatedOn: new Date() });
+		}
+
 		res.json({ message: "Membership updated" });
 	} catch (error) {
 		next(error);
