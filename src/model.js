@@ -143,10 +143,11 @@ const updateAccount = async (req, res, next) => {
 const updateMembership = async (req, res, next) => {
 	try {
 		console.log(req.body);
+		console.log(req.headers);
 		// const channels = await Channels.find({ subscribers: req.user._id })
 		// 	.select("link feedURL title description imageURL")
 		// 	.exec();
-		res.json({});
+		res.json({ message: "Membership updated" });
 	} catch (error) {
 		next(error);
 	}
