@@ -25,7 +25,7 @@ const rssFetcher = async (feedURL) => {
 			item["guid"] = _item.guid ?? _item.id ?? _item.link;
 			item["link"] = _item.link;
 			item["title"] = (_item.title ?? _item.contentSnippet ?? "Untitled").substr(0, 160);
-			item["content"] = _item.content ? domPurify(_item.content) : undefined;
+			item["content"] = _item.content ? domPurify.sanitize(_item.content) : undefined;
 			item["textContent"] = _item.contentSnippet;
 			item["author"] = _item.author;
 			item["publishedOn"] = new Date(_item.isoDate);

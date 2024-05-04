@@ -7,7 +7,6 @@ const rssFetcher = require("./rss-fetcher");
 const fetchAndUpdateChannelItems = async (_channel) => {
 	console.log(`Fetching feed for ${_channel.feedURL}`);
 	const { success, error, channel, items } = await rssFetcher(_channel.feedURL);
-	console.log({ success, error, channel, items, _channel });
 
 	if (!success) return console.error(error, _channel.feedURL);
 
