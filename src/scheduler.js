@@ -21,13 +21,13 @@ const fetchAndUpdateChannelItems = async (_channel) => {
 	if (channel.imageURL && _channel.imageURL !== channel.imageURL) channelUpdateFields["imageURL"] = channel.imageURL;
 	if (channel.link && _channel.link !== channel.link) channelUpdateFields["link"] = channel.link;
 
-	updatePromises.push(Channels.updateOne({ _id: channel._id }, channelUpdateFields));
+	updatePromises.push(Channels.updateOne({ _id: _channel._id }, channelUpdateFields));
 
 	items.forEach((item) => {
 		updatePromises.push(
 			Items.findOneAndUpdate(
 				{ guid: item.guid },
-				{ channel: channel._id, ...item, fetchedOn: date },
+				{ channel: _channel._id, ...item, fetchedOn: date },
 				{ new: true, upsert: true }
 			)
 		);
