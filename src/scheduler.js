@@ -1,4 +1,4 @@
-const cron = require("node-cron");
+const { CronJob } = require("cron");
 
 const { Channels, Items } = require("./collections").getInstance();
 
@@ -34,7 +34,7 @@ const fetchAndUpdateChannelItems = async (_channel) => {
 	});
 
 	await Promise.all(updatePromises);
-	console.log(`Completed scheduled task for ${channel.feedURL}`);
+	console.log(`Upserted ${items.length} items for ${channel.feedURL}`);
 };
 
 const initAllChannelsFetch = async () => {
@@ -53,17 +53,16 @@ const initAllChannelsFetch = async () => {
 
 const scheduleChannelFetch = (channel) => {
 	try {
-		const cronInterval = `*/${channel.fetchIntervalInMinutes ?? 60} * * * *`;
-		console.log(`Job scheduled for ${channel.feedURL}, runs every ${cronInterval}`);
-		const updateChannelFeed = async () => {
-			try {
-				console.log(`running the scheduled task for ${channel.feedURL}`);
-				await fetchAndUpdateChannelItems(channel);
-			} catch (err) {
-				console.error(err);
-			}
-		};
-		cron.schedule(cronInterval, updateChannelFeed);
+		const cronTime = `*/${channel.fetchIntervalInMinutes ?? 60} * * * *`;
+		console.log(`Job scheduled for ${channel.feedURL}, runs ${cronTime}`);
+
+		CronJob.from({
+			cronTime,
+			onTick: () => fetchAndUpdateChannelItems(channel),
+			onComplete: () => console.log(`Completed task for ${channel.feedURL}`),
+			start: true,
+			runOnInit: true,
+		});
 	} catch (err) {
 		console.error(err);
 	}
