@@ -20,16 +20,9 @@
 			"sizes": "any"
 		}
 	],
-	"theme_color": "#f22952",
+	"theme_color": "#fff",
 	"background_color": "#fff",
 	"display": "standalone",
 	"start_url": "/",
-	"permissions": ["notifications"],
-	"share_target": {
-		"action": "/bookmark",
-		"method": "GET",
-		"params": {
-			"url": "url"
-		}
-	}
+	"permissions": []
 }
