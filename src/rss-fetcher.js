@@ -33,6 +33,7 @@ const rssFetcher = async (feedURL) => {
 		});
 		return { success: true, channel, items };
 	} catch (err) {
+		console.error(err);
 		return { success: false, error: err.message };
 	}
 };
