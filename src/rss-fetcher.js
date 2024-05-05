@@ -1,7 +1,7 @@
 const Parser = require("rss-parser");
 const domPurify = require("isomorphic-dompurify");
 
-const parser = new Parser();
+const parser = new Parser({ "User-Agent": "onlie.io" });
 /**
  * This function uses the `rss-parser` to fetch the RSS feed and converts them to a format that can be inserted into the Onlie database
  * @param  {string} feedURL - URL of the RSS feed.
