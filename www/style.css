@@ -1,8 +1,8 @@
 :root {
 	--background: #ffffff;
-	--background-light: #dfdfdf;
-	--text: #111111;
-	--text-light: #555555;
+	--background-light: #efefef;
+	--text: #161616;
+	--text-light: #888;
 	--red: #c0392b;
 	--green: #27ae60;
 	--blue: #0077ff;
@@ -130,7 +130,7 @@ section h1 {
 
 .wrap {
 	width: 100%;
-	max-width: 720px;
+	max-width: 640px;
 	margin-inline: auto;
 	padding: 0px 1rem;
 	box-sizing: border-box;
@@ -158,7 +158,7 @@ section h1 {
 	flex: 1;
 }
 .row {
-	margin: 1rem 0px;
+	padding: 1rem 0px;
 }
 .spacer {
 	height: 1rem;
@@ -167,66 +167,28 @@ section h1 {
 	margin-bottom: 1rem;
 }
 .page-title {
-	font-size: 2rem;
+	font-size: 3rem;
 	margin: auto;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
-	margin: auto auto 1rem 0px;
 }
-.bookmark {
-	margin: 1rem auto 1.5rem;
-}
-.bookmark .link {
-	font-size: 1.2rem;
+.item .title {
 	overflow-wrap: break-word;
 	word-wrap: break-word;
 	word-break: break-word;
-}
-.bookmark .meta a {
+	position: relative;
+	font-size: 1.2rem;
 	color: inherit;
 }
-.switch {
-	position: relative;
-	display: inline-block;
-	width: 3rem;
-	height: 1.5rem;
-}
-.switch input {
-	opacity: 0;
-	width: 0;
-	height: 0;
-}
-.switch .slider {
-	position: absolute;
-	cursor: pointer;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: #ccc;
-	-webkit-transition: 0.4s;
-	transition: 0.4s;
-}
-.switch .slider:before {
-	position: absolute;
-	content: "";
-	height: 1rem;
+.item .meta img {
 	width: 1rem;
-	left: 0.25rem;
-	bottom: 0.25rem;
-	background-color: white;
-	-webkit-transition: 0.4s;
-	transition: 0.4s;
+	margin-right: 0.25rem;
+	position: relative;
+	top: 0.1rem;
 }
-.switch input:checked + .slider {
-	background-color: var(--blue);
-}
-.switch input:focus + .slider {
-	box-shadow: 0 0 1px var(--blue);
-}
-.switch input:checked + .slider:before {
-	transform: translateX(1.5rem);
+.item .meta a {
+	color: inherit;
 }
 
 #app-containter {
@@ -256,6 +218,24 @@ section h1 {
 }
 #toast.success {
 	background: var(--green);
+}
+#circle {
+	display: block;
+	width: 3rem;
+	height: 3rem;
+	padding: 0.5rem;
+	background: none;
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+#circle:hover {
+	background: var(--background-light);
+}
+#circle svg {
+	width: 100%;
+	height: 100%;
 }
 .loader {
 	width: 2rem;
@@ -313,16 +293,4 @@ section h1 {
 	}
 }
 @media only screen and (max-width: 600px) {
-	#searchHeader {
-		flex-direction: column;
-	}
-	#searchHeader form {
-		display: block;
-		width: 100%;
-		margin-bottom: 0.5rem;
-	}
-	input[type="search"] {
-		display: block;
-		width: 100%;
-	}
 }

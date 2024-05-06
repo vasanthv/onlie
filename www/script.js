@@ -32,8 +32,31 @@ const App = Vue.createApp({
 		return defaultState();
 	},
 	computed: {
-		isloggedIn() {
+		isLoggedIn() {
 			return !!this.username;
+		},
+		circleLink() {
+			switch (this.page) {
+				case "home":
+					return "/channels";
+				case "channels":
+				default:
+					return "/";
+			}
+		},
+		pageTitle() {
+			switch (this.page) {
+				case "signUp":
+					return "Create an Account";
+				case "login":
+					return "Log in";
+				case "home":
+					return `@${this.username}`;
+				case "account":
+					return `My Account`;
+				case "channels":
+					return `@${this.username}/channels`;
+			}
 		},
 	},
 	methods: {
@@ -231,16 +254,16 @@ page("*", (ctx, next) => {
 	if (window.cancelRequestController) {
 		window.cancelRequestController.abort();
 	}
-	if (App.isloggedIn) App.getMe();
+	if (App.isLoggedIn) App.getMe();
 	next();
 });
 
 /* Routes declaration */
 page("/", (ctx) => {
 	document.title = "Onlie - Read all your news, social media & blogs in a single feed.";
-	App.page = App.isloggedIn ? "home" : "intro";
+	App.page = App.isLoggedIn ? "home" : "intro";
 
-	if (App.isloggedIn) {
+	if (App.isLoggedIn) {
 		const urlParams = new URLSearchParams(ctx.querystring);
 		App.query = urlParams.get("q");
 		App.getItems();
@@ -249,26 +272,26 @@ page("/", (ctx) => {
 
 page("/signup", () => {
 	document.title = "Sign up: Onlie";
-	if (App.isloggedIn) return page.redirect("/");
+	if (App.isLoggedIn) return page.redirect("/");
 	else App.page = "signup";
 });
 
 page("/login", () => {
 	document.title = "Log in: Onlie";
-	if (App.isloggedIn) return page.redirect("/");
+	if (App.isLoggedIn) return page.redirect("/");
 	else App.page = "login";
 });
 
 page("/channels", () => {
 	document.title = "Channels: Onlie";
-	if (!App.isloggedIn) return page.redirect("/login");
+	if (!App.isLoggedIn) return page.redirect("/login");
 	App.page = "channels";
 	App.getChannels();
 });
 
 page("/account", () => {
 	document.title = "My acount: Onlie";
-	if (!App.isloggedIn) return page.redirect("/login");
+	if (!App.isLoggedIn) return page.redirect("/login");
 	App.page = "account";
 	App.getMe();
 });

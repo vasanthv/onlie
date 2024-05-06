@@ -53,18 +53,42 @@
 				</section>
 
 				<main v-if="page !== 'intro'">
-					<nav>
+					<!-- <nav>
 						<a href="/">Home</a>
 						<span class="separator">&middot;</span>
-						<a href="/signup" v-if="!isloggedIn">Sign up</a>
-						<a href="/channels" v-if="isloggedIn">Channels</a>
+						<a href="/signup" v-if="!isLoggedIn">Sign up</a>
+						<a href="/channels" v-if="isLoggedIn">Channels</a>
 						<span class="separator">&middot;</span>
-						<a href="/login" v-if="!isloggedIn">Log in</a>
-						<a href="/account" v-if="isloggedIn">Account</a>
-					</nav>
+						<a href="/login" v-if="!isLoggedIn">Log in</a>
+						<a href="/account" v-if="isLoggedIn">Account</a>
+					</nav> -->
+
+					<header>
+						<div class="row flex space-between">
+							<h1 class="page-title flex-1">{{pageTitle}}</h1>
+							<a v-bind:href="circleLink" id="circle">
+								<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path
+										fill-rule="evenodd"
+										clip-rule="evenodd"
+										d="M40 80C62.0914 80 80 62.0914 80 40C80 17.9086 62.0914 0 40 0C17.9086 0 0 17.9086 0 40C0 62.0914 17.9086 80 40 80ZM40 65C53.8071 65 65 53.8071 65 40C65 26.1929 53.8071 15 40 15C26.1929 15 15 26.1929 15 40C15 53.8071 26.1929 65 40 65Z"
+										fill="#709EE1"
+									/>
+								</svg>
+							</a>
+						</div>
+						<!-- 							<form action="." v-on:submit="submitHandler">
+								<input
+									type="search"
+									v-model="query"
+									placeholder="Search..."
+									v-on:keydown.enter="search"
+									v-on:search="clearSearch"
+								/>
+							</form> -->
+					</header>
 
 					<section v-if="page === 'signup'">
-						<h1 class="page-title">Create an account</h1>
 						<form action="." v-on:submit="signUp">
 							<label for="username">Username</label>
 							<input type="text" id="username" placeholder="Username" v-model="newAccount.username" />
@@ -78,7 +102,6 @@
 					</section>
 
 					<section v-if="page === 'login'">
-						<h1 class="page-title">Log in</h1>
 						<form action="." v-on:submit="signIn">
 							<label for="username">Username</label>
 							<input type="text" id="username" placeholder="Enter your username" v-model="authCreds.username" />
@@ -91,7 +114,6 @@
 					</section>
 
 					<section v-if="page === 'account'">
-						<h1 class="page-title">Your account</h1>
 						<form action="." v-on:submit="updateAccount">
 							<label for="username">Your username</label>
 							<input type="text" id="username" placeholder="Username" v-model="myAccount.username" />
@@ -110,28 +132,19 @@
 					</section>
 
 					<section v-if="page === 'home'">
-						<div class="flex space-between" id="searchHeader">
-							<h1 class="page-title flex-1">@{{username}}'s feed</h1>
-							<!-- 							<form action="." v-on:submit="submitHandler">
-								<input
-									type="search"
-									v-model="query"
-									placeholder="Search..."
-									v-on:keydown.enter="search"
-									v-on:search="clearSearch"
-								/>
-							</form> -->
-						</div>
-
-						<div v-for="(item, i) in items" v-bind:key="item._id" class="bookmark">
-							<div class="link">
-								<a v-bind:href="item.link" target="_blank" rel="noopener noreferrer">{{item.title}}</a>
-							</div>
-							<div class="meta light">
-								<img v-if="item.channel.imageURL" v-bind:src="item.channel.imageURL" v-bind:alt="item.channel.title" />
-								<span>{{item.channel.title}}</span>
-								<span> &middot; </span>
-								<span>{{displayDate(item.publishedOn)}}</span>
+						<div v-for="(item, i) in items" v-bind:key="item._id" class="item">
+							<div class="row">
+								<a v-bind:href="item.link" target="_blank" rel="noopener noreferrer" class="title">{{item.title}}</a>
+								<div class="meta light">
+									<img
+										v-if="item.channel.imageURL"
+										v-bind:src="item.channel.imageURL"
+										v-bind:alt="item.channel.title"
+									/>
+									<span>{{item.channel.title}}</span>
+									<span> &middot; </span>
+									<span>{{displayDate(item.publishedOn)}}</span>
+								</div>
 							</div>
 						</div>
 						<p v-if="items.length === 0 && !loading" class="light">No items to show</p>
@@ -141,7 +154,6 @@
 					</section>
 
 					<section v-if="page === 'channels'">
-						<h1 class="page-title">My channels</h1>
 						<div>
 							<form action="." v-on:submit="subscribeChannel">
 								<input type="url" v-model="newChannel" placeholder="Enter feed URL" />
@@ -165,6 +177,11 @@
 						<a href="/">Back to home</a>
 					</section>
 				</main>
+				<footer class="small light wrap">
+					<nav>
+						<a href="/account" v-if="isLoggedIn">My account (@{{username}})</a>
+					</nav>
+				</footer>
 			</div>
 		</div>
 		<!-- <footer class="small light wrap">
