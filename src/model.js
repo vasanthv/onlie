@@ -42,7 +42,7 @@ const signUp = async (req, res, next) => {
 
 const logIn = async (req, res, next) => {
 	try {
-		const username = utils.getValidEmail(req.body.username);
+		const username = utils.getValidUsername(req.body.username);
 		const password = utils.getValidPassword(req.body.password);
 
 		const user = await Users.findOne({ username, password }).exec();
@@ -96,9 +96,9 @@ const resetPassword = async (req, res, next) => {
 
 const me = async (req, res, next) => {
 	try {
-		const { username, email, bio, createdOn } = req.user;
+		const { username, email, bio, membershipType, createdOn } = req.user;
 
-		res.json({ username, email, bio, createdOn });
+		res.json({ username, email, bio, membershipType, createdOn });
 	} catch (error) {
 		next(error);
 	}

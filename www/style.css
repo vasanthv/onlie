@@ -1,6 +1,7 @@
 :root {
 	--background: #ffffff;
-	--background-light: #efefef;
+	--background-light: #dfdfdf;
+	--background-yellow: #fffbda;
 	--text: #161616;
 	--text-light: #888;
 	--red: #c0392b;
@@ -159,6 +160,11 @@ section h1 {
 }
 .row {
 	padding: 1rem 0px;
+}
+.card {
+	background: var(--background-yellow);
+	border-radius: 0.5rem;
+	padding: 0.5rem;
 }
 .spacer {
 	height: 1rem;

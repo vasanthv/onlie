@@ -125,6 +125,15 @@
 							<label for="bio">Bio</label>
 							<textarea id="bio" placeholder="Enter bio" v-model="myAccount.bio"></textarea>
 
+							<label>Member type</label>
+							<div>{{myAccount.membershipType}}</div>
+							<div v-if="myAccount.membershipType === 'FREE'">
+								<div>Free users are limited to only 10 channels.</div>
+								<a href="https://buymeacoffee.com/vasanthv/membership">Become a sponsor</a> for just $1/month, to unlock
+								unlimited channels.
+							</div>
+							<br />
+
 							<button class="bold" v-on:click="updateAccount">Update account</button>
 							<br /><br />
 							<button class="red" v-on:click="logOut()">Log out</button>
@@ -169,6 +178,11 @@
 						</div>
 						<p v-if="channels.length === 0 && !loading" class="light">You are not subscribed to any channels</p>
 						<div v-if="loading" class="loader"></div>
+						<div class="card" v-if="myAccount.membershipType === 'FREE'">
+							<div>Free users are limited to only 10 channels.</div>
+							<a href="https://buymeacoffee.com/vasanthv/membership">Become a sponsor</a> for just $1/month, to unlock
+							unlimited channels.
+						</div>
 					</section>
 
 					<section v-if="page === '404'">
@@ -179,20 +193,15 @@
 				</main>
 				<footer class="small light wrap">
 					<nav>
-						<a href="/account" v-if="isLoggedIn">My account (@{{username}})</a>
+						<a href="/faq.html">FAQ</a>
+						<span class="separator">&middot;</span>
+						<a href="/terms.html">Terms</a>
+						<span class="separator" v-if="isLoggedIn">&middot;</span>
+						<a href="/account" v-if="isLoggedIn">Logged in as <strong>@{{username}}</strong></a>
 					</nav>
 				</footer>
 			</div>
 		</div>
-		<!-- <footer class="small light wrap">
-			<nav>
-				<a href="https://github.com/vasanthv/onlie" target="_blank">Open source</a>
-				<span class="separator">&middot;</span>
-				<a href="/terms.html" target="_blank">Terms</a>
-				<span class="separator">&middot;</span>
-				<a href="/privacy.html" target="_blank">Privacy</a>
-			</nav>
-		</footer> -->
 
 		<!-- INSERT_ANALYTICS_SCRIPT -->
 	</body>

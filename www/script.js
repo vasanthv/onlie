@@ -55,7 +55,7 @@ const App = Vue.createApp({
 				case "account":
 					return `My Account`;
 				case "channels":
-					return `@${this.username}/channels`;
+					return "Channels";
 			}
 		},
 	},

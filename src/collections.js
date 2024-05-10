@@ -41,7 +41,7 @@ module.exports = (() => {
 			lastLoginOn: Date,
 			lastUpdatedOn: Date,
 			token: [{ type: String, index: true }],
-			membershipType: { type: String, enum: ["FREE", "PRO"], default: "FREE" },
+			membershipType: { type: String, enum: ["FREE", "SPONSOR"], default: "FREE" },
 		});
 
 		const channelSchema = new Schema({
