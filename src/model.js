@@ -253,7 +253,7 @@ const getItems = async (req, res, next) => {
 		if (searchString) query["$text"] = { $search: searchString };
 
 		const items = await Items.find(query)
-			.select("guid channel title link content textContent author publishedOn")
+			.select("guid channel title link content textContent author comments publishedOn")
 			.populate("channel", "link feedURL title imageURL")
 			.skip(skip)
 			.limit(50)

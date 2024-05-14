@@ -28,6 +28,7 @@ const rssFetcher = async (feedURL) => {
 			item["content"] = _item.content ? domPurify.sanitize(_item.content) : undefined;
 			item["textContent"] = _item.contentSnippet;
 			item["author"] = _item.author;
+			item["comments"] = _item.comments;
 			item["publishedOn"] = new Date(_item.isoDate);
 			return item;
 		});

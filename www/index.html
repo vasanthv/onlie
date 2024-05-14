@@ -53,39 +53,14 @@
 				</section>
 
 				<main v-if="page !== 'intro'">
-					<!-- <nav>
-						<a href="/">Home</a>
-						<span class="separator">&middot;</span>
-						<a href="/signup" v-if="!isLoggedIn">Sign up</a>
-						<a href="/channels" v-if="isLoggedIn">Channels</a>
-						<span class="separator">&middot;</span>
-						<a href="/login" v-if="!isLoggedIn">Log in</a>
-						<a href="/account" v-if="isLoggedIn">Account</a>
-					</nav> -->
-
-					<header>
-						<div class="row flex space-between">
+					<header class="row">
+						<div class="flex space-between">
 							<h1 class="page-title flex-1">{{pageTitle}}</h1>
 							<a v-bind:href="circleLink" id="circle">
-								<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-									<path
-										fill-rule="evenodd"
-										clip-rule="evenodd"
-										d="M40 80C62.0914 80 80 62.0914 80 40C80 17.9086 62.0914 0 40 0C17.9086 0 0 17.9086 0 40C0 62.0914 17.9086 80 40 80ZM40 65C53.8071 65 65 53.8071 65 40C65 26.1929 53.8071 15 40 15C26.1929 15 15 26.1929 15 40C15 53.8071 26.1929 65 40 65Z"
-										fill="#709EE1"
-									/>
-								</svg>
+								<img src="icon.svg" alt="logo" />
 							</a>
 						</div>
-						<!-- 							<form action="." v-on:submit="submitHandler">
-								<input
-									type="search"
-									v-model="query"
-									placeholder="Search..."
-									v-on:keydown.enter="search"
-									v-on:search="clearSearch"
-								/>
-							</form> -->
+						<div v-if="page === 'home' && me.bio" class="light">{{me.bio}}</div>
 					</header>
 
 					<section v-if="page === 'signup'">
@@ -153,6 +128,10 @@
 									<span>{{item.channel.title}}</span>
 									<span> &middot; </span>
 									<span>{{displayDate(item.publishedOn)}}</span>
+									<span v-if="item.comments"> &middot; </span>
+									<a v-bind:href="item.comments" target="_blank" rel="noopener noreferrer" v-if="item.comments"
+										>Comments</a
+									>
 								</div>
 							</div>
 						</div>

@@ -63,6 +63,7 @@ module.exports = (() => {
 			link: String,
 			content: String,
 			textContent: String,
+			comments: String,
 			author: String,
 			publishedOn: Date,
 			fetchedOn: { type: Date, default: Date.now, expires: 30 * 86400 }, // delete 30 days after this item is removed from feed

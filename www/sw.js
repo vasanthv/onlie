@@ -17,6 +17,7 @@ self.addEventListener("install", function (e) {
 		"/index.html",
 		"/terms.html",
 		"/privacy.html",
+		"/icon.svg",
 	];
 
 	// Deleting the previous version of cache

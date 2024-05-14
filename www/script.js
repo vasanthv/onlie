@@ -16,7 +16,7 @@ const defaultState = function () {
 		newAccount: { username: "", email: "", password: "" },
 		authCreds: { username: "", password: "" },
 		toast: [{ type: "", message: "" }],
-		me: { username: "", email: "", password: "" },
+		me: { username: "", email: "", password: "", bio: "" },
 		myAccount: {},
 		newChannel: "",
 		username: window.localStorage.username,
@@ -121,8 +121,8 @@ const App = Vue.createApp({
 		},
 		updateAccount(e) {
 			this.submitHandler(e);
-			const { username, email, password } = this.myAccount;
-			axios.put("/api/account", { username, email, password }).then((response) => {
+			const { username, email, password, bio } = this.myAccount;
+			axios.put("/api/account", { username, email, password, bio }).then((response) => {
 				this.setToast(response.data.message, "success");
 			});
 		},
@@ -189,19 +189,25 @@ const App = Vue.createApp({
 				this.search();
 			}
 		},
-		displayDate(datestring) {
-			const seconds = Math.floor((new Date() - new Date(datestring)) / 1000);
-			let interval = seconds / 31536000;
-			if (interval > 1) return Math.floor(interval) + "Y";
-			interval = seconds / 2592000;
-			if (interval > 1) return Math.floor(interval) + "M";
-			interval = seconds / 86400;
-			if (interval > 1) return Math.floor(interval) + "d";
-			interval = seconds / 3600;
-			if (interval > 1) return Math.floor(interval) + "h";
-			interval = seconds / 60;
-			if (interval > 1) return Math.floor(interval) + "m";
-			return "now";
+		displayDate(input) {
+			const date = input instanceof Date ? input : new Date(input);
+			const formatter = new Intl.RelativeTimeFormat("en");
+			const ranges = {
+				years: 3600 * 24 * 365,
+				months: 3600 * 24 * 30,
+				weeks: 3600 * 24 * 7,
+				days: 3600 * 24,
+				hours: 3600,
+				minutes: 60,
+				seconds: 1,
+			};
+			const secondsElapsed = (date.getTime() - Date.now()) / 1000;
+			for (let key in ranges) {
+				if (ranges[key] < Math.abs(secondsElapsed)) {
+					const delta = secondsElapsed / ranges[key];
+					return formatter.format(Math.round(delta), key);
+				}
+			}
 		},
 		logOut(autoSignOut) {
 			const localClear = () => {
