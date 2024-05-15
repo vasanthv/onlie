@@ -77,16 +77,16 @@ const verifyEmail = async (req, res, next) => {
 
 const resetPassword = async (req, res, next) => {
 	try {
-		const email = req.body.email;
+		const username = utils.getValidUsername(req.body.username);
 
-		const channel = await Users.findOne({ email }).exec();
-		if (!channel) return utils.httpError(400, "Invalid Email");
+		const user = await Users.findOne({ username }).exec();
+		if (!user) return utils.httpError(400, "Invalid username");
 
 		const passwordString = randomString.generate(8);
 		const password = await utils.getValidPassword(passwordString);
 
-		await Users.updateOne({ _id: channel._id }, { password, lastUpdatedOn: new Date() });
-		await sendEmail.resetPasswordEmail(channel.email, passwordString);
+		await Users.updateOne({ _id: user._id }, { password, lastUpdatedOn: new Date() });
+		await sendEmail.resetPasswordEmail(user.email, passwordString);
 
 		res.json({ message: "Password resetted" });
 	} catch (error) {
@@ -136,36 +136,6 @@ const updateAccount = async (req, res, next) => {
 		res.json({
 			message: `Account updated. ${updateFields["emailVerificationCode"] ? "Please verify your email" : ""}`,
 		});
-	} catch (error) {
-		next(error);
-	}
-};
-
-const updateMembership = async (req, res, next) => {
-	try {
-		const userAgent = req.headers["user-agent"];
-		const signature = req.headers["x-signature-sha256"];
-		const type = req.body.type;
-
-		if (userAgent !== "BMC-HTTPS-ROBOT") {
-			return res.json("Invalid user-agent");
-		}
-
-		if (signature !== crypto.createHash("sha256").update(config.BMC_SECRET).digest("hex")) {
-			return res.json("Invalid signature");
-		}
-
-		if (["membership.started", "membership.cancelled"].includes(type)) {
-			const userEmail = req.body.data.supporter_email;
-			const user = await Users.findOne({ email: userEmail }).exec();
-			if (!user) {
-				return res.json("User email not found");
-			}
-			const membershipType = type === "membership.started" ? "PRO" : "FREE";
-			await Users.updateOne({ _id: user._id }, { membershipType, lastUpdatedOn: new Date() });
-		}
-
-		res.json({ message: "Membership updated" });
 	} catch (error) {
 		next(error);
 	}
@@ -244,7 +214,14 @@ const unsubscribeChannel = async (req, res, next) => {
 
 const getItems = async (req, res, next) => {
 	try {
-		const channelIds = await Channels.find({ subscribers: req.user._id }).select("_id").exec();
+		const username = req.params.username;
+		let user = req.user;
+
+		if (username) user = await Users.findOne({ username }).exec();
+
+		if (!user) return utils.httpError(400, "Invalid request");
+
+		const channelIds = await Channels.find({ subscribers: user._id }).select("_id").exec();
 
 		const skip = Number(req.query.skip) || 0;
 		const searchString = req.query.query;
@@ -283,7 +260,6 @@ module.exports = {
 	resetPassword,
 	me,
 	updateAccount,
-	updateMembership,
 	getChannels,
 	subscribeChannel,
 	unsubscribeChannel,

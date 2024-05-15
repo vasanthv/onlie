@@ -44,8 +44,6 @@ router.get("/csrf.js", async (req, res) => {
 	res.send(`window.CSRF_TOKEN="${csrfToken}"`);
 });
 
-router.post("/membership", model.updateMembership);
-
 router.use(utils.csrfValidator);
 
 router.post("/signup", utils.rateLimit({ windowMs: 30, max: 2, skipFailedRequests: true }), model.signUp);
@@ -53,6 +51,9 @@ router.post("/login", utils.rateLimit({ max: 5 }), model.logIn);
 router.post("/reset", utils.rateLimit({ max: 5 }), model.resetPassword);
 
 router.use(utils.attachUsertoRequest);
+
+router.get("/@:username/items", model.getItems);
+
 router.use(utils.isUserAuthed);
 
 router.put("/account", model.updateAccount);
