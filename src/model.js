@@ -237,7 +237,7 @@ const getItems = async (req, res, next) => {
 			.sort("-publishedOn")
 			.exec();
 
-		res.json({ items });
+		res.json({ items, bio: user.bio });
 	} catch (error) {
 		next(error);
 	}

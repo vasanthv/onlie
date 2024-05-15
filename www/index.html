@@ -60,7 +60,7 @@
 								<img src="icon.svg" alt="logo" />
 							</a>
 						</div>
-						<div v-if="page === 'home' && me.bio" class="light">{{me.bio}}</div>
+						<div v-if="showItemFeed && userBio" class="light">{{userBio}}</div>
 					</header>
 
 					<section v-if="page === 'signup'">
@@ -115,7 +115,7 @@
 						</form>
 					</section>
 
-					<section v-if="page === 'home'">
+					<section v-if="showItemFeed">
 						<div v-for="(item, i) in items" v-bind:key="item._id" class="item">
 							<div class="row">
 								<a v-bind:href="item.link" target="_blank" rel="noopener noreferrer" class="title">{{item.title}}</a>

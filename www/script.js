@@ -23,7 +23,9 @@ const defaultState = function () {
 		channels: [],
 		items: [],
 		query: searchParams.get("q"),
+		selectedUser: null,
 		showLoadMore: false,
+		userBio: "",
 	};
 };
 
@@ -35,11 +37,13 @@ const App = Vue.createApp({
 		isLoggedIn() {
 			return !!this.username;
 		},
+		showItemFeed() {
+			return ["home", "user"].includes(this.page);
+		},
 		circleLink() {
 			switch (this.page) {
 				case "home":
 					return "/channels";
-				case "channels":
 				default:
 					return "/";
 			}
@@ -52,6 +56,8 @@ const App = Vue.createApp({
 					return "Log in";
 				case "home":
 					return `@${this.username}`;
+				case "user":
+					return `@${this.selectedUser.username}`;
 				case "account":
 					return `My Account`;
 				case "channels":
@@ -143,13 +149,15 @@ const App = Vue.createApp({
 			if (this.items.length > 0) {
 				params["skip"] = this.items.length;
 			}
+			const apiURL = this.selectedUser ? `/api/@${this.selectedUser.username}/items` : "/api/items";
 			axios
-				.get("/api/items", { params })
+				.get(apiURL, { params })
 				.then((response) => {
 					if (response.data.items.length > 0) {
 						response.data.items.forEach((m) => this.items.push(m));
 					}
 					this.showLoadMore = response.data.items.length == 50;
+					this.userBio = response.data.bio;
 				})
 				.finally(() => {
 					this.loading = false;
@@ -296,10 +304,17 @@ page("/channels", () => {
 });
 
 page("/account", () => {
-	document.title = "My acount: Onlie";
+	document.title = "My account: Onlie";
 	if (!App.isLoggedIn) return page.redirect("/login");
 	App.page = "account";
 	App.getMe();
+});
+
+page("/@:username", (r) => {
+	document.title = `@${r.params.username}: Onlie`;
+	App.page = "user";
+	App.selectedUser = { username: r.params.username };
+	App.getItems();
 });
 
 page("/*", () => {
