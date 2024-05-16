@@ -125,7 +125,7 @@
 										v-bind:src="item.channel.imageURL"
 										v-bind:alt="item.channel.title"
 									/>
-									<span>{{item.channel.title}}</span>
+									<a v-bind:href="item.channel.link">{{item.channel.title}}</a>
 									<span> &middot; </span>
 									<span>{{displayDate(item.publishedOn)}}</span>
 									<span v-if="item.comments"> &middot; </span>
@@ -144,14 +144,26 @@
 					<section v-if="page === 'channels'">
 						<div>
 							<form action="." v-on:submit="subscribeChannel">
-								<input type="url" v-model="newChannel" placeholder="Enter feed URL" />
+								<div class="flex">
+									<input type="url" v-model="newChannel" placeholder="Enter feed URL" id="newFeedURL" class="flex-1" />
+									<button>+</button>
+								</div>
 							</form>
 						</div>
-						<div v-for="(channel, i) in channels" v-bind:key="channel._id">
+						<div v-for="(channel, i) in channels" v-bind:key="channel._id" class="item">
 							<div class="link">
-								<div>
-									({{channel.title}})
-									<button v-on:click="unsubscribeChannel(channel._id)">Remove</button>
+								<div class="row">
+									<a v-bind:href="channel.link" class="title" target="_blank" rel="noopener noreferrer"
+										>{{channel.title}}</a
+									>
+									<div class="meta light">
+										<img v-if="channel.imageURL" v-bind:src="channel.imageURL" v-bind:alt="channel.title" />
+										<a v-bind:href="channel.feedURL" target="_blank" rel="noopener noreferrer">
+											{{displayURL(channel.feedURL)}}
+										</a>
+										<span> &middot; </span>
+										<a href="javascript:void(0)" v-on:click="unsubscribeChannel(channel._id)" class="light">Remove</a>
+									</div>
 								</div>
 							</div>
 						</div>

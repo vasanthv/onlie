@@ -217,6 +217,11 @@ const App = Vue.createApp({
 				}
 			}
 		},
+		displayURL(_url) {
+			let url = _url.replace(/^https?:\/\//i, "");
+			url = url.length > 30 ? `${url.substr(0, 30)}...` : url;
+			return url;
+		},
 		logOut(autoSignOut) {
 			const localClear = () => {
 				window.localStorage.clear();
