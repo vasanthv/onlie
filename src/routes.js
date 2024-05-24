@@ -49,14 +49,10 @@ router.post("/auth", utils.rateLimit({ windowMs: 30, max: 5, skipFailedRequests:
 
 router.use(utils.attachUsertoRequest);
 
-router.get("/@:username/items", model.getItems);
-
 router.use(utils.isUserAuthed);
 
-router.put("/account", model.updateAccount);
-router.post("/logout", model.logOut);
-
 router.get("/me", model.me);
+router.post("/logout", model.logOut);
 
 router.get("/channels", model.getChannels);
 router.post("/channels/subscribe", utils.canUserSubscribe, model.subscribeChannel);

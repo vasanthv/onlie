@@ -1,4 +1,3 @@
-const randomString = require("randomstring");
 const { randomInt } = require("crypto");
 const uuid = require("uuid").v4;
 
@@ -64,27 +63,6 @@ const me = async (req, res, next) => {
 	}
 };
 
-const updateAccount = async (req, res, next) => {
-	try {
-		const username =
-			req.body.username && req.body.username !== req.user.username
-				? await utils.getValidUsername(req.body.username)
-				: null;
-		if (username) await utils.isNewUsername(username, req.user._id);
-
-		const bio = req.body.bio ? req.body.bio.substring(0, 160) : null;
-
-		const updateFields = {};
-		if (username) updateFields["username"] = username;
-		if (bio) updateFields["bio"] = bio;
-
-		await Users.updateOne({ _id: req.user._id }, { ...updateFields, lastUpdatedOn: new Date() });
-		res.json({ message: "Account updated." });
-	} catch (error) {
-		next(error);
-	}
-};
-
 const getChannels = async (req, res, next) => {
 	try {
 		const channels = await Channels.find({ subscribers: req.user._id })
@@ -138,7 +116,9 @@ const subscribeChannel = async (req, res, next) => {
 				);
 			});
 			await Promise.all(itemUpserts);
-		} catch (err) {}
+		} catch (err) {
+			// Do nothing
+		}
 	} catch (error) {
 		next(error);
 	}
@@ -157,14 +137,11 @@ const unsubscribeChannel = async (req, res, next) => {
 
 const getItems = async (req, res, next) => {
 	try {
-		const username = req.params.username;
 		let user = req.user;
-
-		if (username) user = await Users.findOne({ username }).exec();
 
 		if (!user) return utils.httpError(400, "Invalid request");
 
-		const channelIds = await Channels.find({ subscribers: user._id }).select("_id").exec();
+		const channelIds = user.channels.map((user) => user.channel);
 
 		const skip = Number(req.query.skip) || 0;
 		const searchString = req.query.query;
@@ -180,7 +157,7 @@ const getItems = async (req, res, next) => {
 			.sort("-publishedOn")
 			.exec();
 
-		res.json({ items, bio: user.bio });
+		res.json({ items });
 	} catch (error) {
 		next(error);
 	}
@@ -199,7 +176,6 @@ const logOut = async (req, res, next) => {
 module.exports = {
 	authenticate,
 	me,
-	updateAccount,
 	getChannels,
 	subscribeChannel,
 	unsubscribeChannel,
