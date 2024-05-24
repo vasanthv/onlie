@@ -230,7 +230,7 @@ const isNewEmail = async (email, currentUserId) => {
 const getUserByEmail = async (email) => {
 	let query = { email: { $regex: new RegExp(`^${email}$`, "i") } };
 
-	return await Users.findOne(query).select("email").exec();
+	return await Users.findOne(query).exec();
 };
 
 /**

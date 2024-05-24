@@ -24,7 +24,6 @@ router.use(
 	})
 );
 
-router.get("/verify/:code", model.verifyEmail);
 router.post("/error", (req, res) => {
 	console.error({ browserError: req.body });
 	res.send();

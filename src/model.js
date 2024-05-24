@@ -27,7 +27,7 @@ const authenticate = async (req, res, next) => {
 			// Authenticate the user
 			const token = uuid();
 			const devices = { token, userAgent };
-			await Users.updateOne({ _id: user._id }, { $push: { devices }, lastLoginAt: date });
+			await Users.updateOne({ _id: user._id }, { $push: { devices }, $unset: { otp: 1 }, lastLoginAt: date });
 
 			req.session.token = token;
 
@@ -43,6 +43,10 @@ const authenticate = async (req, res, next) => {
 		}
 
 		sendEmail.otpEmail(email, otp);
+
+		setTimeout(async () => {
+			await Users.updateOne({ _id: user._id, otp }, { $unset: { otp: 1 } });
+		}, 1000 * 60 * 15);
 
 		return res.json({ message: `One-time password sent to ${email}.` });
 	} catch (error) {
