@@ -223,6 +223,17 @@ const isNewEmail = async (email, currentUserId) => {
 };
 
 /**
+ * A database helper function to fetch user by email
+ * @param  {string} email - Email address to be validated.
+ * @return {Promise<User>} A promise which resolves to user object
+ */
+const getUserByEmail = async (email) => {
+	let query = { email: { $regex: new RegExp(`^${email}$`, "i") } };
+
+	return await Users.findOne(query).select("email").exec();
+};
+
+/**
  * Finds & returns the RSS/ATOM feed url from the website.
  * @param  {string} url - URL from which the RSS feed URL is to be fetched.
  * @return {Promise<string | null>} - RSS/ATOM feed url if present
@@ -282,6 +293,7 @@ module.exports = {
 	getValidPassword,
 	isNewUsername,
 	isNewEmail,
+	getUserByEmail,
 	hashString,
 	httpError,
 	attachUsertoRequest,

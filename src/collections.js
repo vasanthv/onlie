@@ -32,16 +32,16 @@ module.exports = (() => {
 		console.log("Onlie DB initialized");
 
 		const userSchema = new Schema({
-			username: { type: String, index: true, required: true, unique: true, match: /^([a-zA-Z0-9]){1,18}$/ },
+			username: { type: String, index: true, unique: true, sparse: true, match: /^([a-zA-Z0-9]){1,18}$/ },
 			email: { type: String, index: true, unique: true, required: true },
-			password: { type: String, required: true },
-			emailVerificationCode: { type: String, index: true },
+			otp: { type: String, index: true },
 			bio: String,
 			joinedOn: { type: Date, default: Date.now },
 			lastLoginOn: Date,
 			lastUpdatedOn: Date,
-			token: [{ type: String, index: true }],
+			devices: [{ token: { type: String, index: true }, userAgent: { type: String } }],
 			membershipType: { type: String, enum: ["FREE", "SPONSOR"], default: "FREE" },
+			channels: [{ channel: { type: Schema.Types.ObjectId, ref: "Channels", index: true }, subscribedOn: Date }],
 		});
 
 		const channelSchema = new Schema({
@@ -53,7 +53,6 @@ module.exports = (() => {
 			createdOn: { type: Date, default: Date.now },
 			lastFetchedOn: Date, // Last successful fetch of the RSS feed
 			fetchIntervalInMinutes: { type: Number, default: 60 },
-			subscribers: [{ type: Schema.Types.ObjectId, ref: "Users", index: true }],
 		});
 
 		const itemSchema = new Schema({
@@ -66,7 +65,7 @@ module.exports = (() => {
 			comments: String,
 			author: String,
 			publishedOn: Date,
-			fetchedOn: { type: Date, default: Date.now, expires: 30 * 86400 }, // delete 30 days after this item is removed from feed
+			touchedOn: { type: Date, default: Date.now, expires: 30 * 86400 }, // delete 30 days after this item is removed from feed
 		});
 		itemSchema.index({ title: "text", textContent: "text" });
 

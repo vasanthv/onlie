@@ -46,9 +46,7 @@ router.get("/csrf.js", async (req, res) => {
 
 router.use(utils.csrfValidator);
 
-router.post("/signup", utils.rateLimit({ windowMs: 30, max: 2, skipFailedRequests: true }), model.signUp);
-router.post("/login", utils.rateLimit({ max: 5 }), model.logIn);
-router.post("/reset", utils.rateLimit({ max: 5 }), model.resetPassword);
+router.post("/auth", utils.rateLimit({ windowMs: 30, max: 5, skipFailedRequests: true }), model.authenticate);
 
 router.use(utils.attachUsertoRequest);
 

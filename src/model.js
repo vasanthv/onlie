@@ -1,4 +1,5 @@
 const randomString = require("randomstring");
+const { randomInt } = require("crypto");
 const uuid = require("uuid").v4;
 
 const utils = require("./utils");
@@ -8,87 +9,42 @@ const rssFetcher = require("./rss-fetcher");
 const { Users, Channels, Items } = require("./collections").getInstance();
 
 const { scheduleChannelFetch } = require("./scheduler");
-const config = require("./config");
 
-const signUp = async (req, res, next) => {
+const authenticate = async (req, res, next) => {
 	try {
-		const username = utils.getValidUsername(req.body.username);
-		await utils.isNewUsername(username);
 		const email = utils.getValidEmail(req.body.email);
-		await utils.isNewEmail(email);
-		const password = utils.getValidPassword(req.body.password);
+		const userAgent = req.get("user-agent");
+
 		const date = new Date();
 
-		const emailVerificationCode = uuid();
-		const token = uuid();
+		let otp = req.body.otp;
+		let user = await utils.getUserByEmail(email);
 
-		await new Users({
-			username,
-			email,
-			password,
-			emailVerificationCode,
-			token: [token],
-			createdAt: date,
-		}).save();
-		req.session.token = token;
+		if (otp) {
+			if (!user) return utils.httpError(401, "Invalid user");
+			if (user.otp !== otp) return utils.httpError(401, "Invalid OTP");
 
-		res.json({ message: "Account created. Please verify your email.", username });
+			// Authenticate the user
+			const token = uuid();
+			const devices = { token, userAgent };
+			await Users.updateOne({ _id: user._id }, { $push: { devices }, lastLoginAt: date });
 
-		sendEmail.verificationEmail(username, email, emailVerificationCode);
-	} catch (error) {
-		next(error);
-	}
-};
+			req.session.token = token;
 
-const logIn = async (req, res, next) => {
-	try {
-		const username = utils.getValidUsername(req.body.username);
-		const password = utils.getValidPassword(req.body.password);
+			return res.json({ message: "Authenticated", email });
+		}
 
-		const user = await Users.findOne({ username, password }).exec();
+		otp = randomInt(100000, 999999);
 
-		if (!user) return utils.httpError(400, "Invalid user credentials");
+		if (!user) {
+			await new Users({ email, otp, createdAt: date }).save();
+		} else {
+			await Users.updateOne({ _id: user._id }, { otp });
+		}
 
-		const token = uuid();
+		sendEmail.otpEmail(email, otp);
 
-		await Users.updateOne({ _id: user._id }, { $push: { token }, lastLoginAt: new Date() });
-
-		req.session.token = token;
-		res.json({ message: "Logged in", username: user.username });
-	} catch (error) {
-		next(error);
-	}
-};
-
-const verifyEmail = async (req, res, next) => {
-	try {
-		const code = req.params.code;
-
-		const user = await Users.findOne({ emailVerificationCode: code }).exec();
-		if (!user) return res.status(400).send("Invalid email verification code");
-
-		await Users.updateOne({ _id: user._id }, { $unset: { emailVerificationCode: 1 }, lastUpdatedAt: new Date() });
-
-		res.send("Email verified");
-	} catch (error) {
-		next(error);
-	}
-};
-
-const resetPassword = async (req, res, next) => {
-	try {
-		const username = utils.getValidUsername(req.body.username);
-
-		const user = await Users.findOne({ username }).exec();
-		if (!user) return utils.httpError(400, "Invalid username");
-
-		const passwordString = randomString.generate(8);
-		const password = await utils.getValidPassword(passwordString);
-
-		await Users.updateOne({ _id: user._id }, { password, lastUpdatedOn: new Date() });
-		await sendEmail.resetPasswordEmail(user.email, passwordString);
-
-		res.json({ message: "Password resetted" });
+		return res.json({ message: `One-time password sent to ${email}.` });
 	} catch (error) {
 		next(error);
 	}
@@ -112,30 +68,14 @@ const updateAccount = async (req, res, next) => {
 				: null;
 		if (username) await utils.isNewUsername(username, req.user._id);
 
-		const email =
-			req.body.email && req.body.email !== req.user.email ? await utils.getValidEmail(req.body.email) : null;
-		if (email) await utils.isNewEmail(email, req.user._id);
-
-		const password = req.body.password ? await utils.getValidPassword(req.body.password) : null;
-
 		const bio = req.body.bio ? req.body.bio.substring(0, 160) : null;
 
 		const updateFields = {};
 		if (username) updateFields["username"] = username;
-		if (password) updateFields["password"] = password;
 		if (bio) updateFields["bio"] = bio;
 
-		if (email && email !== req.user.email) {
-			const emailVerificationCode = uuid();
-			updateFields["email"] = email;
-			updateFields["emailVerificationCode"] = emailVerificationCode;
-			await sendEmail.verificationEmail(req.user.username, email, emailVerificationCode);
-		}
-
 		await Users.updateOne({ _id: req.user._id }, { ...updateFields, lastUpdatedOn: new Date() });
-		res.json({
-			message: `Account updated. ${updateFields["emailVerificationCode"] ? "Please verify your email" : ""}`,
-		});
+		res.json({ message: "Account updated." });
 	} catch (error) {
 		next(error);
 	}
@@ -154,10 +94,6 @@ const getChannels = async (req, res, next) => {
 
 const subscribeChannel = async (req, res, next) => {
 	try {
-		if (req.user.emailVerificationCode) {
-			return res.status(400).json({ message: "Please verify your email." });
-		}
-
 		let feedURL = utils.getValidURL(req.body.url);
 		const date = new Date();
 
@@ -182,7 +118,10 @@ const subscribeChannel = async (req, res, next) => {
 			scheduleChannelFetch(channel);
 		}
 
-		await Channels.updateOne({ _id: channel._id }, { $push: { subscribers: req.user._id }, lastFetchedOn: date });
+		await Promise.all([
+			Channels.updateOne({ _id: channel._id }, { $push: { subscribers: req.user._id }, lastFetchedOn: date }),
+			Users.updateOne({ _id: req.user._id }, { $push: { channels: { channel: channel._id, subscribedOn: date } } }),
+		]);
 
 		res.json({ message: "Channel subscribed" });
 
@@ -190,7 +129,7 @@ const subscribeChannel = async (req, res, next) => {
 			const itemUpserts = rssData.items.map((item) => {
 				return Items.findOneAndUpdate(
 					{ guid: item.guid },
-					{ channel: channel._id, ...item, fetchedOn: date },
+					{ channel: channel._id, ...item, touchedOn: date },
 					{ new: true, upsert: true }
 				);
 			});
@@ -204,7 +143,7 @@ const subscribeChannel = async (req, res, next) => {
 const unsubscribeChannel = async (req, res, next) => {
 	try {
 		let channelId = req.body.channelId;
-		await Channels.updateOne({ _id: channelId }, { $pull: { subscribers: req.user._id } });
+		await Users.updateOne({ _id: req.user._id }, { $pull: { channels: { channel: channelId } } });
 
 		res.json({ message: "Channel unsubscribed" });
 	} catch (error) {
@@ -254,10 +193,7 @@ const logOut = async (req, res, next) => {
 };
 
 module.exports = {
-	signUp,
-	logIn,
-	verifyEmail,
-	resetPassword,
+	authenticate,
 	me,
 	updateAccount,
 	getChannels,

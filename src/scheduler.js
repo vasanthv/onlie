@@ -27,7 +27,7 @@ const fetchAndUpdateChannelItems = async (_channel) => {
 		updatePromises.push(
 			Items.findOneAndUpdate(
 				{ guid: item.guid },
-				{ channel: _channel._id, ...item, fetchedOn: date },
+				{ channel: _channel._id, ...item, touchedOn: date },
 				{ new: true, upsert: true }
 			)
 		);
