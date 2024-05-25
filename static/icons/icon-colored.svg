@@ -1,0 +1,20 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<linearGradient id="gradient" x1="50" y1="28.787" x2="50" y2="71.2129" gradientUnits="userSpaceOnUse">
+			<stop stop-color="#40C9FF"/>
+			<stop offset="1" stop-color="#E81CFF"/>
+		</linearGradient>
+	</defs>
+	<ellipse cx="50" cy="50" rx="13.2581" ry="21.2129" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="13.2581" ry="21.2129" transform="rotate(-150 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="13.2581" ry="21.2129" transform="rotate(-60 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="13.2581" ry="21.2129" transform="rotate(-90 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="13.2581" ry="21.2129" transform="rotate(-30 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="13.2581" ry="21.2129" transform="rotate(-120 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="25" ry="40" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="25" ry="40" transform="rotate(-150 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="25" ry="40" transform="rotate(-60 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="25" ry="40" transform="rotate(-90 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="25" ry="40" transform="rotate(-30 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+	<ellipse cx="50" cy="50" rx="25" ry="40" transform="rotate(-120 50 50)" fill="url(#gradient)" fill-opacity="0.16"/>
+</svg>
