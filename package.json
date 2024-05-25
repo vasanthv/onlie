@@ -22,7 +22,6 @@
 		"body-parser": "^1.20.2",
 		"connect-mongo": "^5.1.0",
 		"cron": "^3.1.7",
-		"dotenv": "^16.4.5",
 		"express": "^4.19.2",
 		"express-rate-limit": "^7.2.0",
 		"express-session": "^1.18.0",
@@ -32,8 +31,6 @@
 		"mongoose": "^8.3.2",
 		"morgan": "^1.10.0",
 		"multer": "^1.4.5-lts.1",
-		"page": "^1.11.6",
-		"randomstring": "^1.3.0",
 		"rss-parser": "^3.13.0",
 		"uuid": "^9.0.1",
 		"vue": "^3.4.25"
