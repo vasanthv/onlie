@@ -32,10 +32,8 @@ module.exports = (() => {
 		console.log("Onlie DB initialized");
 
 		const userSchema = new Schema({
-			username: { type: String, index: true, unique: true, sparse: true, match: /^([a-zA-Z0-9]){1,18}$/ },
 			email: { type: String, index: true, unique: true, required: true },
 			otp: { type: String, index: true },
-			bio: String,
 			joinedOn: { type: Date, default: Date.now },
 			lastLoginOn: Date,
 			lastUpdatedOn: Date,

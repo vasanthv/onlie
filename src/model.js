@@ -21,7 +21,7 @@ const authenticate = async (req, res, next) => {
 
 		if (otp) {
 			if (!user) return utils.httpError(401, "Invalid user");
-			if (user.otp !== otp) return utils.httpError(401, "Invalid OTP");
+			if (user.otp !== utils.hashString(otp)) return utils.httpError(401, "Invalid OTP");
 
 			// Authenticate the user
 			const token = uuid();
@@ -34,17 +34,18 @@ const authenticate = async (req, res, next) => {
 		}
 
 		otp = randomInt(100000, 999999);
+		const otpHash = utils.hashString(otp);
 
 		if (!user) {
-			await new Users({ email, otp, createdAt: date }).save();
+			await new Users({ email, otp: otpHash, createdAt: date }).save();
 		} else {
-			await Users.updateOne({ _id: user._id }, { otp });
+			await Users.updateOne({ _id: user._id }, { otp: otpHash });
 		}
 
 		sendEmail.otpEmail(email, otp);
 
 		setTimeout(async () => {
-			await Users.updateOne({ _id: user._id, otp }, { $unset: { otp: 1 } });
+			await Users.updateOne({ _id: user._id, otp: otpHash }, { $unset: { otp: 1 } });
 		}, 1000 * 60 * 15);
 
 		return res.json({ message: `One-time password sent to ${email}.` });
