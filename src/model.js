@@ -56,20 +56,11 @@ const authenticate = async (req, res, next) => {
 
 const me = async (req, res, next) => {
 	try {
-		const { username, email, bio, membershipType, createdOn } = req.user;
+		const user = await Users.findOne({ _id: req.user._id })
+			.populate([{ path: "channels.channel", select: "link feedURL title description imageURL" }])
+			.select("email membershipType channels createdOn");
 
-		res.json({ username, email, bio, membershipType, createdOn });
-	} catch (error) {
-		next(error);
-	}
-};
-
-const getChannels = async (req, res, next) => {
-	try {
-		const channels = await Channels.find({ subscribers: req.user._id })
-			.select("link feedURL title description imageURL")
-			.exec();
-		res.json({ channels });
+		res.json(user);
 	} catch (error) {
 		next(error);
 	}
@@ -177,7 +168,6 @@ const logOut = async (req, res, next) => {
 module.exports = {
 	authenticate,
 	me,
-	getChannels,
 	subscribeChannel,
 	unsubscribeChannel,
 	getItems,

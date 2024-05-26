@@ -1,31 +1,21 @@
 /* global page, axios, Vue, cabin */
 
-const initApp = async () => {
-	if ("serviceWorker" in navigator) {
-		await navigator.serviceWorker.register("/sw.js");
-	}
-};
-
 const defaultState = function () {
 	const searchParams = new URLSearchParams(window.location.search);
 	return {
 		online: navigator.onLine,
 		visible: document.visibilityState === "visible",
 		loading: true,
-		page: "",
-		newAccount: { username: "", email: "", password: "" },
-		authCreds: { username: "", password: "" },
+		page: "", // intro | otp | feed | settings
+		auth: { email: "", otp: "" },
+		userEmail: window.localStorage.email,
 		toast: [{ type: "", message: "" }],
-		me: { username: "", email: "", password: "", bio: "" },
-		myAccount: {},
 		newChannel: "",
-		username: window.localStorage.username,
+		me: {},
 		channels: [],
 		items: [],
 		query: searchParams.get("q"),
-		selectedUser: null,
 		showLoadMore: false,
-		userBio: "",
 	};
 };
 
@@ -35,37 +25,37 @@ const App = Vue.createApp({
 	},
 	computed: {
 		isLoggedIn() {
-			return !!this.username;
+			return !!this.userEmail;
 		},
-		showItemFeed() {
-			return ["home", "user"].includes(this.page);
-		},
-		circleLink() {
-			switch (this.page) {
-				case "home":
-					return "/channels";
-				default:
-					return "/";
-			}
+		isValidAuthEmail() {
+			var re = /\S+@\S+\.\S+/;
+			return re.test(this.auth.email);
 		},
 		pageTitle() {
 			switch (this.page) {
-				case "signUp":
-					return "Create an Account";
-				case "login":
-					return "Log in";
-				case "home":
-					return `@${this.username}`;
-				case "user":
-					return `@${this.selectedUser.username}`;
-				case "account":
-					return `My Account`;
-				case "channels":
-					return "Channels";
+				case "otp":
+					return "One-time password";
+				case "feed":
+					return "Feed";
+				case "settings":
+					return "Settings";
+				default:
+					return "Onlie";
 			}
 		},
 	},
 	methods: {
+		initApp() {
+			this.page = this.isLoggedIn ? "feed" : "intro";
+
+			// register service worker
+			if ("serviceWorker" in navigator) {
+				navigator.serviceWorker.register("/sw.js");
+			}
+			if (this.page === "feed") {
+				this.loadFeeds();
+			}
+		},
 		setNetworkStatus() {
 			this.online = navigator.onLine;
 		},
@@ -87,61 +77,38 @@ const App = Vue.createApp({
 		userEvent(event) {
 			if (cabin) cabin.event(event);
 		},
-		signUp(e) {
-			this.submitHandler(e);
-			if (!this.newAccount.username || !this.newAccount.email || !this.newAccount.password) {
-				return this.setToast("All fields are mandatory");
-			}
-			axios.post("/api/signup", this.newAccount).then(this.authenticate);
-			this.userEvent("signup");
+		sendOTP() {
+			// this.submitHandler(e);
+			if (!this.isValidAuthEmail) return this.setToast("Please enter a valid email.");
+
+			axios.post("/api/auth", { email: this.auth.email }).then(() => (this.page = "otp"));
 		},
-		signIn(e) {
-			this.submitHandler(e);
-			if (!this.authCreds.username || !this.authCreds.password) {
-				return this.setToast("Please enter valid details");
-			}
-			axios.post("/api/login", this.authCreds).then(this.authenticate);
-			this.userEvent("login");
-		},
-		forgotPassword() {
-			if (!this.authCreds.email) {
-				return this.setToast("Please enter your email");
-			}
-			axios.post("/api/reset", { email: this.authCreds.email }).then((response) => {
-				this.setToast(response.data.message, "success");
-			});
+		signIn() {
+			// this.submitHandler(e);
+			if (!this.isValidAuthEmail) return this.setToast("Please enter a valid email.");
+			if (!this.auth.otp) return this.setToast("Please enter a valid OTP.");
+
+			axios.post("/api/auth", this.auth).then(this.authenticate);
+			this.userEvent("authenticated");
 		},
 		authenticate(response) {
-			window.localStorage.username = this.username = response.data.username;
-			this.newAccount = { username: "", email: "", password: "" };
-			this.authCreds = { username: "", password: "" };
-			page.redirect("/");
+			window.localStorage.email = this.userEmail = response.data.email;
+			this.auth = { email: "", otp: "" };
 			this.setToast(response.data.message, "success");
+			this.page = "feed";
+			this.loadFeeds();
 		},
-		getMe(queryParams = "") {
-			axios.get(`/api/me${queryParams}`).then((response) => {
-				window.localStorage.username = this.username = response.data.username;
-				this.me = { ...this.me, ...response.data };
-				this.myAccount = { ...this.me };
+		loadFeeds() {
+			this.getMe();
+			this.getItems();
+		},
+		getMe() {
+			axios.get("/api/me").then((response) => {
+				const { channels, ...me } = response.data;
+				window.localStorage.email = this.userEmail = me.email;
+				this.channels = channels;
+				this.me = me;
 			});
-		},
-		updateAccount(e) {
-			this.submitHandler(e);
-			const { username, email, password, bio } = this.myAccount;
-			axios.put("/api/account", { username, email, password, bio }).then((response) => {
-				this.setToast(response.data.message, "success");
-			});
-		},
-		getChannels() {
-			this.loading = true;
-			axios
-				.get("/api/channels")
-				.then((response) => {
-					this.channels = response.data.channels;
-				})
-				.finally(() => {
-					this.loading = false;
-				});
 		},
 		getItems() {
 			this.loading = true;
@@ -149,32 +116,28 @@ const App = Vue.createApp({
 			if (this.items.length > 0) {
 				params["skip"] = this.items.length;
 			}
-			const apiURL = this.selectedUser ? `/api/@${this.selectedUser.username}/items` : "/api/items";
 			axios
-				.get(apiURL, { params })
+				.get("/api/items", { params })
 				.then((response) => {
 					if (response.data.items.length > 0) {
 						response.data.items.forEach((m) => this.items.push(m));
 					}
 					this.showLoadMore = response.data.items.length == 50;
-					this.userBio = response.data.bio;
 				})
-				.finally(() => {
-					this.loading = false;
-				});
+				.finally(() => (this.loading = false));
 		},
 		subscribeChannel(e) {
 			this.submitHandler(e);
 			axios.post("/api/channels/subscribe", { url: this.newChannel }).then((response) => {
 				this.setToast(response.data.message, "success");
-				this.getChannels();
+				this.getMe();
 				this.newChannel = "";
 			});
 		},
 		unsubscribeChannel(channelId) {
 			axios.post("/api/channels/unsubscribe", { channelId }).then((response) => {
 				this.setToast(response.data.message, "success");
-				this.getChannels();
+				this.getMe();
 			});
 		},
 		submitHandler(e) {
@@ -248,11 +211,6 @@ window.onerror = App.logError;
 		axios.defaults.headers.common["x-csrf-token"] = window.CSRF_TOKEN;
 	}
 
-	axios.interceptors.request.use((config) => {
-		window.cancelRequestController = new AbortController();
-		return { ...config, signal: window.cancelRequestController.signal };
-	});
-
 	axios.interceptors.response.use(
 		(response) => response,
 		(error) => {
@@ -264,67 +222,5 @@ window.onerror = App.logError;
 			throw error;
 		}
 	);
-	initApp();
+	App.initApp();
 })();
-
-page("*", (ctx, next) => {
-	// resetting state on any page load
-	App.resetState();
-	if (window.cancelRequestController) {
-		window.cancelRequestController.abort();
-	}
-	if (App.isLoggedIn) App.getMe();
-	next();
-});
-
-/* Routes declaration */
-page("/", (ctx) => {
-	document.title = "Onlie - Read all your news, social media & blogs in a single feed.";
-	App.page = App.isLoggedIn ? "home" : "intro";
-
-	if (App.isLoggedIn) {
-		const urlParams = new URLSearchParams(ctx.querystring);
-		App.query = urlParams.get("q");
-		App.getItems();
-	}
-});
-
-page("/signup", () => {
-	document.title = "Sign up: Onlie";
-	if (App.isLoggedIn) return page.redirect("/");
-	else App.page = "signup";
-});
-
-page("/login", () => {
-	document.title = "Log in: Onlie";
-	if (App.isLoggedIn) return page.redirect("/");
-	else App.page = "login";
-});
-
-page("/channels", () => {
-	document.title = "Channels: Onlie";
-	if (!App.isLoggedIn) return page.redirect("/login");
-	App.page = "channels";
-	App.getChannels();
-});
-
-page("/account", () => {
-	document.title = "My account: Onlie";
-	if (!App.isLoggedIn) return page.redirect("/login");
-	App.page = "account";
-	App.getMe();
-});
-
-page("/@:username", (r) => {
-	document.title = `@${r.params.username}: Onlie`;
-	App.page = "user";
-	App.selectedUser = { username: r.params.username };
-	App.getItems();
-});
-
-page("/*", () => {
-	document.title = "Page not found: Onlie";
-	App.page = "404";
-});
-
-page();

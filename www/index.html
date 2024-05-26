@@ -29,7 +29,6 @@
 
 		<script defer src="/vue.global.prod.js"></script>
 		<script defer src="/axios.min.js"></script>
-		<script defer src="/page.js"></script>
 		<script defer src="/api/csrf.js"></script>
 		<script defer src="/script.js"></script>
 	</head>
@@ -56,66 +55,16 @@
 					<header class="row">
 						<div class="flex space-between">
 							<h1 class="page-title flex-1">{{pageTitle}}</h1>
-							<a v-bind:href="circleLink" id="circle">
+							<a href="javascript:void()" id="logo" v-on:click="page = 'settings'">
 								<img src="favicon.svg" alt="logo" />
 							</a>
 						</div>
-						<div v-if="showItemFeed && userBio" class="light">{{userBio}}</div>
+						<div v-if="channels.length === 0" class="light">
+							Read all your news, social media & blogs in a single feed. Start adding channels by clicking the logo.
+						</div>
 					</header>
 
-					<section v-if="page === 'signup'">
-						<form action="." v-on:submit="signUp">
-							<label for="username">Username</label>
-							<input type="text" id="username" placeholder="Username" v-model="newAccount.username" />
-							<label for="email">E-mail address</label>
-							<input type="email" id="email" placeholder="Email address" v-model="newAccount.email" />
-							<label for="password">Password</label>
-							<input type="password" id="password" placeholder="Password" v-model="newAccount.password" />
-							<button class="bold" v-on:click="signUp">Sign up</button>
-						</form>
-						<div class="small light">Already got an account? <a href="/login">Log in</a></div>
-					</section>
-
-					<section v-if="page === 'login'">
-						<form action="." v-on:submit="signIn">
-							<label for="username">Username</label>
-							<input type="text" id="username" placeholder="Enter your username" v-model="authCreds.username" />
-							<label for="password">Password</label>
-							<input type="password" id="password" placeholder="Password" v-model="authCreds.password" />
-							<button class="bold" v-on:click="signIn">Log in</button>
-						</form>
-						<div class="small"><a href="javascript:void(0)" v-on:click="forgotPassword">Forgot password?</a></div>
-						<div class="small light">Don't have an account yet? <a href="/signup">Sign up</a></div>
-					</section>
-
-					<section v-if="page === 'account'">
-						<form action="." v-on:submit="updateAccount">
-							<label for="username">Your username</label>
-							<input type="text" id="username" placeholder="Username" v-model="myAccount.username" />
-							<label for="email">Your e-mail address</label>
-							<input type="email" id="email" placeholder="Email address" v-model="myAccount.email" />
-							<label for="password">Password</label>
-							<input type="password" id="password" placeholder="Enter new password" v-model="myAccount.password" />
-
-							<label for="bio">Bio</label>
-							<textarea id="bio" placeholder="Enter bio" v-model="myAccount.bio"></textarea>
-
-							<label>Member type</label>
-							<div>{{myAccount.membershipType}}</div>
-							<div v-if="myAccount.membershipType === 'FREE'">
-								<div>Free users are limited to only 10 channels.</div>
-								<a href="https://buymeacoffee.com/vasanthv/membership">Become a sponsor</a> for just $1/month, to unlock
-								unlimited channels.
-							</div>
-							<br />
-
-							<button class="bold" v-on:click="updateAccount">Update account</button>
-							<br /><br />
-							<button class="red" v-on:click="logOut()">Log out</button>
-						</form>
-					</section>
-
-					<section v-if="showItemFeed">
+					<section v-if="page == 'feed'">
 						<div v-for="(item, i) in items" v-bind:key="item._id" class="item">
 							<div class="row">
 								<a v-bind:href="item.link" target="_blank" rel="noopener noreferrer" class="title">{{item.title}}</a>
@@ -141,7 +90,141 @@
 						<button class="link bold" v-on:click="getItems" v-if="showLoadMore">Load more &darr;</button>
 					</section>
 
-					<section v-if="page === 'channels'">
+					<section id="settings" v-if="page === 'settings'">
+						<details open>
+							<summary>Subscribed feeds</summary>
+							<div>
+								<form action="." v-on:submit="subscribeChannel" id="newFeedForm">
+									<div class="flex">
+										<input
+											type="url"
+											v-model="newChannel"
+											placeholder="Enter feed URL"
+											id="newFeedURL"
+											class="flex-1"
+										/>
+										<button>Add</button>
+									</div>
+								</form>
+								<div v-for="(channel, i) in channels" v-bind:key="channel.channel._id" class="item">
+									<div class="link">
+										<div class="row">
+											<a v-bind:href="channel.channel.link" class="title" target="_blank" rel="noopener noreferrer"
+												>{{channel.channel.title}}</a
+											>
+											<div class="meta light">
+												<img
+													v-if="channel.channel.imageURL"
+													v-bind:src="channel.channel.imageURL"
+													v-bind:alt="channel.channel.title"
+												/>
+												<a v-bind:href="channel.channel.feedURL" target="_blank" rel="noopener noreferrer">
+													{{displayURL(channel.channel.feedURL)}}
+												</a>
+												<span> &middot; </span>
+												<a href="javascript:void(0)" v-on:click="unsubscribeChannel(channel.channel._id)" class="light"
+													>Remove</a
+												>
+											</div>
+										</div>
+									</div>
+								</div>
+								<p v-if="channels.length === 0 && !loading" class="light">You are not subscribed to any channels</p>
+							</div>
+						</details>
+
+						<br />
+						<div class="card" v-if="me.membershipType === 'FREE'">
+							<div>Free users are limited to only 10 channels.</div>
+							<a href="https://buymeacoffee.com/vasanthv/membership">Become a sponsor</a> for just $1/month, to unlock
+							unlimited channels.
+						</div>
+						<br />
+						<div>
+							You are logged in with <strong>{{me.email}}</strong>.
+							<a href="javascript:void(0)" v-on:click="logOut()">Logout</a>
+						</div>
+					</section>
+
+					<!-- <section v-if="page === 'signup'">
+						<form action="." v-on:submit="signUp">
+							<label for="username">Username</label>
+							<input type="text" id="username" placeholder="Username" v-model="newAccount.username" />
+							<label for="email">E-mail address</label>
+							<input type="email" id="email" placeholder="Email address" v-model="newAccount.email" />
+							<label for="password">Password</label>
+							<input type="password" id="password" placeholder="Password" v-model="newAccount.password" />
+							<button class="bold" v-on:click="signUp">Sign up</button>
+						</form>
+						<div class="small light">Already got an account? <a href="/login">Log in</a></div>
+					</section>
+
+					<section v-if="page === 'login'">
+						<form action="." v-on:submit="signIn">
+							<label for="username">Username</label>
+							<input type="text" id="username" placeholder="Enter your username" v-model="authCreds.username" />
+							<label for="password">Password</label>
+							<input type="password" id="password" placeholder="Password" v-model="authCreds.password" />
+							<button class="bold" v-on:click="signIn">Log in</button>
+						</form>
+						<div class="small"><a href="javascript:void(0)" v-on:click="forgotPassword">Forgot password?</a></div>
+						<div class="small light">Don't have an account yet? <a href="/signup">Sign up</a></div>
+					</section> -->
+
+					<!-- <section v-if="page === 'account'">
+						<form action="." v-on:submit="updateAccount">
+							<label for="username">Your username</label>
+							<input type="text" id="username" placeholder="Username" v-model="myAccount.username" />
+							<label for="email">Your e-mail address</label>
+							<input type="email" id="email" placeholder="Email address" v-model="myAccount.email" />
+							<label for="password">Password</label>
+							<input type="password" id="password" placeholder="Enter new password" v-model="myAccount.password" />
+
+							<label for="bio">Bio</label>
+							<textarea id="bio" placeholder="Enter bio" v-model="myAccount.bio"></textarea>
+
+							<label>Member type</label>
+							<div>{{myAccount.membershipType}}</div>
+							<div v-if="myAccount.membershipType === 'FREE'">
+								<div>Free users are limited to only 10 channels.</div>
+								<a href="https://buymeacoffee.com/vasanthv/membership">Become a sponsor</a> for just $1/month, to unlock
+								unlimited channels.
+							</div>
+							<br />
+
+							<button class="bold" v-on:click="updateAccount">Update account</button>
+							<br /><br />
+							<button class="red" v-on:click="logOut()">Log out</button>
+						</form>
+					</section> -->
+
+					<!-- <section v-if="showItemFeed">
+						<div v-for="(item, i) in items" v-bind:key="item._id" class="item">
+							<div class="row">
+								<a v-bind:href="item.link" target="_blank" rel="noopener noreferrer" class="title">{{item.title}}</a>
+								<div class="meta light">
+									<img
+										v-if="item.channel.imageURL"
+										v-bind:src="item.channel.imageURL"
+										v-bind:alt="item.channel.title"
+									/>
+									<a v-bind:href="item.channel.link">{{item.channel.title}}</a>
+									<span> &middot; </span>
+									<span>{{displayDate(item.publishedOn)}}</span>
+									<span v-if="item.comments"> &middot; </span>
+									<a v-bind:href="item.comments" target="_blank" rel="noopener noreferrer" v-if="item.comments"
+										>Comments</a
+									>
+								</div>
+							</div>
+						</div>
+						<p v-if="items.length === 0 && !loading" class="light">No items to show</p>
+						<div v-if="loading" class="loader"></div>
+
+						<button class="link bold" v-on:click="getItems" v-if="showLoadMore">Load more &darr;</button>
+					</section> -->
+
+					<!-- <section v-if="page === 'channels'">
 						<div>
 							<form action="." v-on:submit="subscribeChannel">
 								<div class="flex">
@@ -174,25 +257,20 @@
 							<a href="https://buymeacoffee.com/vasanthv/membership">Become a sponsor</a> for just $1/month, to unlock
 							unlimited channels.
 						</div>
-					</section>
-
-					<section v-if="page === '404'">
-						<h1 class="page-title">Page not found</h1>
-						<div>The page you are looking for does not exist.</div>
-						<a href="/">Back to home</a>
-					</section>
+					</section> -->
 				</main>
-				<footer class="small light wrap">
-					<nav>
-						<a href="/faq.html">FAQ</a>
-						<span class="separator">&middot;</span>
-						<a href="/terms.html">Terms</a>
-						<span class="separator" v-if="isLoggedIn">&middot;</span>
-						<a href="/account" v-if="isLoggedIn">Logged in as <strong>@{{username}}</strong></a>
-					</nav>
-				</footer>
 			</div>
 		</div>
+
+		<footer class="small light wrap">
+			<nav>
+				<a href="/sponsors">Become a sponsor</a>
+				<span class="separator">&middot;</span>
+				<a href="/terms">Terms</a>
+				<span class="separator">&middot;</span>
+				<a href="/privacy">Privacy</a>
+			</nav>
+		</footer>
 
 		<!-- INSERT_ANALYTICS_SCRIPT -->
 	</body>

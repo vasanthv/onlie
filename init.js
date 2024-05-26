@@ -23,9 +23,9 @@ app.use(morgan("dev")); // for dev logging
 app.use("/api", apiRoutes);
 
 app.use("/:page", (req, res) => {
-	const filePath = path.join(__dirname, `www/${req.params.page}.html`);
+	const filePath = path.join(__dirname, `static/${req.params.page}.html`);
 	if (!fs.existsSync(filePath)) {
-		return res.status(404).sendFile(path.join(__dirname, "www/404.html"));
+		return res.status(404).sendFile(path.join(__dirname, "static/404.html"));
 	}
 
 	res.sendfile(filePath);

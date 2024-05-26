@@ -111,6 +111,9 @@ button.link.red {
 	background: none;
 	color: var(--red);
 }
+summary {
+	font-weight: bold;
+}
 code {
 	display: block;
 	border: 1px solid var(--text-light);
@@ -226,7 +229,7 @@ section h1 {
 #toast.success {
 	background: var(--green);
 }
-#circle {
+#logo {
 	display: block;
 	width: 3rem;
 	height: 3rem;
@@ -238,17 +241,22 @@ section h1 {
 	box-sizing: border-box;
 	transition: transform 0.5s;
 }
-#circle:hover,
-#circle:active {
-	transform: scale(1.5) rotate(90deg);
+#logo:hover,
+#logo:active {
+	transform: scale(1.25) rotate(90deg);
 	/*	background: var(--background-light);*/
 }
-#circle svg {
+#logo svg {
 	width: 100%;
 	height: 100%;
 }
+#newFeedForm {
+	position: relative;
+	top: 0.5rem;
+}
 #newFeedURL {
 	margin-right: 0.25rem;
+	max-width: none;
 }
 .loader {
 	width: 2rem;

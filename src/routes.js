@@ -9,7 +9,6 @@ const config = require("./config");
 const model = require("./model");
 const utils = require("./utils");
 
-// Username API requests
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(morgan("dev")); // for dev logging
@@ -24,6 +23,7 @@ router.use(
 	})
 );
 
+// Logging UI errors
 router.post("/error", (req, res) => {
 	console.error({ browserError: req.body });
 	res.send();
@@ -45,19 +45,18 @@ router.get("/csrf.js", async (req, res) => {
 
 router.use(utils.csrfValidator);
 
-router.post("/auth", utils.rateLimit({ windowMs: 30, max: 5, skipFailedRequests: true }), model.authenticate);
+router.post("/auth", utils.rateLimit({ windowMs: 15, max: 5, skipFailedRequests: true }), model.authenticate);
 
 router.use(utils.attachUsertoRequest);
-
 router.use(utils.isUserAuthed);
 
 router.get("/me", model.me);
-router.post("/logout", model.logOut);
 
-router.get("/channels", model.getChannels);
 router.post("/channels/subscribe", utils.canUserSubscribe, model.subscribeChannel);
 router.post("/channels/unsubscribe", model.unsubscribeChannel);
 router.get("/items", model.getItems);
+
+router.post("/logout", model.logOut);
 
 /**
  * API endpoints common error handling middleware
