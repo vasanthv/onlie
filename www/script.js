@@ -34,7 +34,7 @@ const App = Vue.createApp({
 		pageTitle() {
 			switch (this.page) {
 				case "otp":
-					return "One-time password";
+					return "OTP";
 				case "feed":
 					return "Feed";
 				case "settings":
@@ -42,6 +42,13 @@ const App = Vue.createApp({
 				default:
 					return "Onlie";
 			}
+		},
+		pageDesc() {
+			if (this.channels.length === 0 && this.page === "feed") {
+				return "Read all your news, social media & blogs in a single feed. Start adding channels by clicking the logo.";
+			} else if (this.page === "otp") {
+				return `We have sent an one-time password to your email "${this.auth.email}", use that to sign in.`;
+			} else return;
 		},
 	},
 	methods: {
@@ -144,6 +151,23 @@ const App = Vue.createApp({
 			e.preventDefault();
 			e.stopPropagation();
 		},
+		logoClickHandler() {
+			let page = "intro";
+			switch (this.page) {
+				case "otp":
+					page = "intro";
+					break;
+				case "feed":
+					page = "settings";
+					break;
+				case "settings":
+					page = "feed";
+					break;
+				default:
+					page = "intro";
+			}
+			this.page = page;
+		},
 		search() {
 			const url = new URL(window.location);
 			if (this.query) url.searchParams.set("q", this.query);
@@ -189,7 +213,7 @@ const App = Vue.createApp({
 			const localClear = () => {
 				window.localStorage.clear();
 				this.resetState();
-				page.redirect("/");
+				this.page = "intro";
 			};
 			if (autoSignOut || confirm("Are you sure, you want to log out?")) axios.post("/api/logout").finally(localClear);
 		},

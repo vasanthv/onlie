@@ -46,24 +46,25 @@
 
 					<h3>Just pay $1/Month.</h3>
 
-					<div><a href="/signup" class="bold">Create free account</a></div>
-					<br />
-					<div>Already have an account? <a href="/login">Log in</a></div>
+					<input type="text" id="email" placeholder="Enter email" v-model="auth.email" />
+					<button class="bold" v-on:click="sendOTP">Get started</button>
 				</section>
 
 				<main v-if="page !== 'intro'">
 					<header class="row">
 						<div class="flex space-between">
 							<h1 class="page-title flex-1">{{pageTitle}}</h1>
-							<a href="javascript:void()" id="logo" v-on:click="page = 'settings'">
+							<a href="javascript:void()" id="logo" v-on:click="logoClickHandler">
 								<img src="favicon.svg" alt="logo" />
 							</a>
 						</div>
-						<div v-if="channels.length === 0" class="light">
-							Read all your news, social media & blogs in a single feed. Start adding channels by clicking the logo.
-						</div>
+						<div v-if="pageDesc" class="light">{{pageDesc}}</div>
 					</header>
 
+					<section v-if="page == 'otp'">
+						<input type="number" id="otp" placeholder="Enter OTP" v-model="auth.otp" />
+						<button class="bold" v-on:click="signIn">Log in</button>
+					</section>
 					<section v-if="page == 'feed'">
 						<div v-for="(item, i) in items" v-bind:key="item._id" class="item">
 							<div class="row">
