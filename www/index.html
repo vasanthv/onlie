@@ -39,13 +39,40 @@
 					{{toast.message}}
 				</section>
 
-				<section class="page" v-if="page === 'intro'">
-					<nav>&nbsp;</nav>
-					<h1 class="page-title">Onlie</h1>
-					<h2>Read all your news, social media & blogs in a single feed.</h2>
+				<section id="intro" class="page" v-if="page === 'intro'">
+					<div id="flower"><img src="icon-colored.svg" /></div>
+					<div class="section wrap mini">
+						<div class="center">
+							<h1>Read all your news, social media & blogs in a single feed.</h1>
 
-					<input type="text" id="email" placeholder="Enter email" v-model="auth.email" />
-					<button class="bold" v-on:click="sendOTP">Get started</button>
+							<div class="flex">
+								<input type="email" placeholder="Enter email" v-model="auth.email" class="flex-1" />
+								<button class="bold" v-on:click="sendOTP">Get started</button>
+							</div>
+						</div>
+					</div>
+					<div class="section">
+						<p class="quote">
+							<strong>Onlie</strong> is a minimal rss/atom feed reader that lets you read all your news, social media &
+							blogs in a single feed. It shows a chronological feed from all your subscribed channels/feeds in a single
+							feed.
+						</p>
+					</div>
+					<div class="section">
+						<div>
+							<h3>It is free (upto 10 channels)</h3>
+							<p>
+								Onlie is free for anyone to use, become a sponsor for just $1/month only if you want unlimited channels.
+							</p>
+						</div>
+					</div>
+					<div class="section">
+						<div class="wrap mini">
+							<h3>Get started for free</h3>
+							<input type="email" placeholder="Enter email" v-model="auth.email" class="flex-1" />
+							<button class="bold" v-on:click="sendOTP">Submit</button>
+						</div>
+					</div>
 				</section>
 
 				<main v-if="page !== 'intro'">

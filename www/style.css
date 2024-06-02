@@ -141,6 +141,9 @@ section h1 {
 	padding: 0px 1rem;
 	box-sizing: border-box;
 }
+.wrap.mini {
+	max-width: 480px;
+}
 .light {
 	color: var(--text-light);
 }
@@ -152,6 +155,9 @@ section h1 {
 }
 .bold {
 	font-weight: 700;
+}
+.center {
+	text-align: center;
 }
 .flex {
 	display: flex;
@@ -229,6 +235,39 @@ section h1 {
 }
 #toast.success {
 	background: var(--green);
+}
+#intro .section {
+	min-height: 90vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+}
+#intro input {
+	margin-right: 0.5rem;
+}
+#intro #flower {
+	position: fixed;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+}
+#intro #flower img {
+	display: block;
+	width: 100%;
+	max-width: 656px;
+	margin: auto;
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+}
+#intro .quote {
+	font-size: 1.5rem;
 }
 #logo {
 	display: block;

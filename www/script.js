@@ -230,6 +230,20 @@ window.addEventListener("offline", App.setNetworkStatus);
 document.addEventListener("visibilitychange", App.setVisibility);
 window.onerror = App.logError;
 
+window.onscroll = () => {
+	const flowerEle = document.querySelector("#flower img");
+	if (flowerEle) {
+		const scrollPercentage =
+			((document.documentElement.scrollTop + document.body.scrollTop) /
+				(document.documentElement.scrollHeight - document.documentElement.clientHeight)) *
+			100;
+		const flowerScale = (scrollPercentage / 100) * 3 + 1;
+		const flowerOpacity = Math.abs(scrollPercentage / 100 - 1);
+		flowerEle.style.transform = `rotate(${scrollPercentage}deg) scale(${flowerScale})`;
+		flowerEle.style.opacity = flowerOpacity;
+	}
+};
+
 (() => {
 	if (window.CSRF_TOKEN) {
 		axios.defaults.headers.common["x-csrf-token"] = window.CSRF_TOKEN;
