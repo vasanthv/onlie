@@ -6,7 +6,7 @@ const defaultState = function () {
 		online: navigator.onLine,
 		visible: document.visibilityState === "visible",
 		loading: true,
-		page: "", // intro | otp | feed | settings
+		page: "", // intro | otp | feed | channels
 		auth: { email: "", otp: "" },
 		userEmail: window.localStorage.email,
 		toast: [{ type: "", message: "" }],
@@ -37,15 +37,15 @@ const App = Vue.createApp({
 					return "OTP";
 				case "feed":
 					return "Feed";
-				case "settings":
-					return "Settings";
+				case "channels":
+					return "Channels";
 				default:
 					return "Onlie";
 			}
 		},
 		pageDesc() {
 			if (this.channels.length === 0 && this.page === "feed") {
-				return "Read all your news, social media & blogs in a single feed. Start adding channels by clicking the logo.";
+				return "";
 			} else if (this.page === "otp") {
 				return `We have sent an one-time password to your email "${this.auth.email}", use that to sign in.`;
 			} else return;
@@ -59,7 +59,7 @@ const App = Vue.createApp({
 			if ("serviceWorker" in navigator) {
 				navigator.serviceWorker.register("/sw.js");
 			}
-			if (this.page === "feed") {
+			if (this.isLoggedIn) {
 				this.loadFeeds();
 			}
 		},
@@ -135,11 +135,15 @@ const App = Vue.createApp({
 		},
 		subscribeChannel(e) {
 			this.submitHandler(e);
-			axios.post("/api/channels/subscribe", { url: this.newChannel }).then((response) => {
-				this.setToast(response.data.message, "success");
-				this.getMe();
-				this.newChannel = "";
-			});
+			this.loading = true;
+			axios
+				.post("/api/channels/subscribe", { url: this.newChannel })
+				.then((response) => {
+					this.setToast(response.data.message, "success");
+					this.getMe();
+					this.newChannel = "";
+				})
+				.finally(() => (this.loading = false));
 		},
 		unsubscribeChannel(channelId) {
 			axios.post("/api/channels/unsubscribe", { channelId }).then((response) => {
@@ -158,9 +162,9 @@ const App = Vue.createApp({
 					page = "intro";
 					break;
 				case "feed":
-					page = "settings";
+					page = "channels";
 					break;
-				case "settings":
+				case "channels":
 					page = "feed";
 					break;
 				default:
@@ -229,20 +233,6 @@ window.addEventListener("online", App.setNetworkStatus);
 window.addEventListener("offline", App.setNetworkStatus);
 document.addEventListener("visibilitychange", App.setVisibility);
 window.onerror = App.logError;
-
-window.onscroll = () => {
-	const flowerEle = document.querySelector("#flower img");
-	if (flowerEle) {
-		const scrollPercentage =
-			((document.documentElement.scrollTop + document.body.scrollTop) /
-				(document.documentElement.scrollHeight - document.documentElement.clientHeight)) *
-			100;
-		const flowerScale = (scrollPercentage / 100) * 3 + 1;
-		const flowerOpacity = Math.abs(scrollPercentage / 100 - 1);
-		flowerEle.style.transform = `rotate(${scrollPercentage}deg) scale(${flowerScale})`;
-		flowerEle.style.opacity = flowerOpacity;
-	}
-};
 
 (() => {
 	if (window.CSRF_TOKEN) {

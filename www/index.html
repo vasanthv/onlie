@@ -40,40 +40,26 @@
 				</section>
 
 				<section id="intro" class="page" v-if="page === 'intro'">
-					<div id="flower"><img src="icon-colored.svg" /></div>
-					<div class="section wrap mini">
-						<div class="center">
+					<div class="wrap mini">
+						<div>
+							<div id="logo">
+								<img src="favicon.svg" alt="logo" />
+							</div>
 							<h1>Read all your news, social media & blogs in a single feed.</h1>
+							<p>
+								Onlie is a minimal rss/atom feed reader, that shows a single chronological feed from multiple feeds.
+							</p>
 
 							<div class="flex">
-								<input type="email" placeholder="Enter email" v-model="auth.email" class="flex-1" />
+								<input
+									type="email"
+									placeholder="Enter email"
+									v-model="auth.email"
+									v-on:keyup.enter="sendOTP"
+									class="flex-1"
+								/>
 								<button class="bold" v-on:click="sendOTP">Get started</button>
 							</div>
-						</div>
-					</div>
-					<div class="section">
-						<div>
-							<h2>Onlie is a minimal rss/atom feed reader.</h2>
-							<h3>Features</h3>
-							<ul>
-								<li>Subscribe to any RSS/atom feed</li>
-								<li>Don't know the rss URL, just add the website URL</li>
-								<li>Chronological feed</li>
-								<li>Progessing web-app. Installable as mobile app.</li>
-								<li>Supports YouTube, Mastodan, Bluesky profile</li>
-								<li>Opt-in push notification on new posts (coming soon)</li>
-								<li>
-									Free upto 10 channels. (Become a sponsor for just $1/month, only if you want unlimited channels).
-								</li>
-							</ul>
-						</div>
-					</div>
-
-					<div class="section">
-						<div class="wrap mini">
-							<h3>Get started for free</h3>
-							<input type="email" placeholder="Enter email" v-model="auth.email" class="flex-1" />
-							<button class="bold" v-on:click="sendOTP">Submit</button>
 						</div>
 					</div>
 				</section>
@@ -82,17 +68,25 @@
 					<header class="row">
 						<div class="flex space-between">
 							<h1 class="page-title flex-1">{{pageTitle}}</h1>
-							<a href="javascript:void()" id="logo" v-on:click="logoClickHandler">
+							<a
+								href="javascript:void()"
+								id="logo"
+								v-on:click="logoClickHandler"
+								v-bind:class="page === 'channels' ? 'active' : ''"
+							>
 								<img src="favicon.svg" alt="logo" />
 							</a>
 						</div>
-						<div v-if="pageDesc" class="light">{{pageDesc}}</div>
 					</header>
 
 					<section v-if="page == 'otp'">
-						<input type="number" id="otp" placeholder="Enter OTP" v-model="auth.otp" />
-						<button class="bold" v-on:click="signIn">Log in</button>
+						<p>We have sent an one-time password to your email "{{auth.email}}", use that to sign in.</p>
+						<div>
+							<input type="number" id="otp" placeholder="Enter OTP" v-model="auth.otp" />
+							<button class="bold" v-on:click="signIn">Log in</button>
+						</div>
 					</section>
+
 					<section v-if="page == 'feed'">
 						<div v-for="(item, i) in items" v-bind:key="item._id" class="item">
 							<div class="row">
@@ -113,31 +107,35 @@
 								</div>
 							</div>
 						</div>
-						<p v-if="items.length === 0 && !loading" class="light">No items to show</p>
+						<div v-if="items.length === 0 && !loading" class="empty">
+							<h3>No items to show</h3>
+							<p>Start adding channels by clicking the logo or the below button.</p>
+							<button v-on:click="page = 'channels'">+ Add a channel</button>
+						</div>
 						<div v-if="loading" class="loader"></div>
 
 						<button class="link bold" v-on:click="getItems" v-if="showLoadMore">Load more &darr;</button>
 					</section>
 
-					<section id="settings" v-if="page === 'settings'">
-						<details open>
-							<summary>Subscribed feeds</summary>
-							<div>
-								<form action="." v-on:submit="subscribeChannel" id="newFeedForm">
-									<div class="flex">
-										<input
-											type="url"
-											v-model="newChannel"
-											placeholder="Enter feed URL"
-											id="newFeedURL"
-											class="flex-1"
-										/>
-										<button>Add</button>
-									</div>
-								</form>
-								<div v-for="(channel, i) in channels" v-bind:key="channel.channel._id" class="item">
-									<div class="link">
-										<div class="row">
+					<section id="channels" v-if="page === 'channels'">
+						<div>
+							<div class="flex">
+								<input
+									type="url"
+									class="flex-1"
+									id="newFeedURL"
+									v-model="newChannel"
+									placeholder="Enter feed URL"
+									v-on:keyup.enter="subscribeChannel"
+									v-bind:disabled="loading"
+								/>
+								<button v-on:click="subscribeChannel" v-bind:disabled="loading">Add</button>
+							</div>
+
+							<div v-for="(channel, i) in channels" v-bind:key="channel.channel._id" class="item">
+								<div class="row">
+									<div class="link flex">
+										<div class="flex-1">
 											<a v-bind:href="channel.channel.link" class="title" target="_blank" rel="noopener noreferrer"
 												>{{channel.channel.title}}</a
 											>
@@ -150,19 +148,17 @@
 												<a v-bind:href="channel.channel.feedURL" target="_blank" rel="noopener noreferrer">
 													{{displayURL(channel.channel.feedURL)}}
 												</a>
-												<span> &middot; </span>
-												<a href="javascript:void(0)" v-on:click="unsubscribeChannel(channel.channel._id)" class="light"
-													>Remove</a
-												>
 											</div>
 										</div>
+										<button v-on:click="unsubscribeChannel(channel.channel._id)" class="action"></button>
 									</div>
 								</div>
-								<p v-if="channels.length === 0 && !loading" class="light">You are not subscribed to any channels</p>
 							</div>
-						</details>
+							<p v-if="channels.length === 0 && !loading" class="empty">You are not subscribed to any channels</p>
+						</div>
 
-						<br />
+						<hr />
+
 						<div class="card" v-if="me.membershipType === 'FREE'">
 							<div>Free users are limited to only 10 channels.</div>
 							<a href="/sponsors">Become a sponsor</a> for just $1/month, to unlock unlimited channels.
@@ -173,126 +169,15 @@
 							<a href="javascript:void(0)" v-on:click="logOut()">Logout</a>
 						</div>
 					</section>
-
-					<!-- <section v-if="page === 'signup'">
-						<form action="." v-on:submit="signUp">
-							<label for="username">Username</label>
-							<input type="text" id="username" placeholder="Username" v-model="newAccount.username" />
-							<label for="email">E-mail address</label>
-							<input type="email" id="email" placeholder="Email address" v-model="newAccount.email" />
-							<label for="password">Password</label>
-							<input type="password" id="password" placeholder="Password" v-model="newAccount.password" />
-							<button class="bold" v-on:click="signUp">Sign up</button>
-						</form>
-						<div class="small light">Already got an account? <a href="/login">Log in</a></div>
-					</section>
-
-					<section v-if="page === 'login'">
-						<form action="." v-on:submit="signIn">
-							<label for="username">Username</label>
-							<input type="text" id="username" placeholder="Enter your username" v-model="authCreds.username" />
-							<label for="password">Password</label>
-							<input type="password" id="password" placeholder="Password" v-model="authCreds.password" />
-							<button class="bold" v-on:click="signIn">Log in</button>
-						</form>
-						<div class="small"><a href="javascript:void(0)" v-on:click="forgotPassword">Forgot password?</a></div>
-						<div class="small light">Don't have an account yet? <a href="/signup">Sign up</a></div>
-					</section> -->
-
-					<!-- <section v-if="page === 'account'">
-						<form action="." v-on:submit="updateAccount">
-							<label for="username">Your username</label>
-							<input type="text" id="username" placeholder="Username" v-model="myAccount.username" />
-							<label for="email">Your e-mail address</label>
-							<input type="email" id="email" placeholder="Email address" v-model="myAccount.email" />
-							<label for="password">Password</label>
-							<input type="password" id="password" placeholder="Enter new password" v-model="myAccount.password" />
-
-							<label for="bio">Bio</label>
-							<textarea id="bio" placeholder="Enter bio" v-model="myAccount.bio"></textarea>
-
-							<label>Member type</label>
-							<div>{{myAccount.membershipType}}</div>
-							<div v-if="myAccount.membershipType === 'FREE'">
-								<div>Free users are limited to only 10 channels.</div>
-								<a href="https://buymeacoffee.com/vasanthv/membership">Become a sponsor</a> for just $1/month, to unlock
-								unlimited channels.
-							</div>
-							<br />
-
-							<button class="bold" v-on:click="updateAccount">Update account</button>
-							<br /><br />
-							<button class="red" v-on:click="logOut()">Log out</button>
-						</form>
-					</section> -->
-
-					<!-- <section v-if="showItemFeed">
-						<div v-for="(item, i) in items" v-bind:key="item._id" class="item">
-							<div class="row">
-								<a v-bind:href="item.link" target="_blank" rel="noopener noreferrer" class="title">{{item.title}}</a>
-								<div class="meta light">
-									<img
-										v-if="item.channel.imageURL"
-										v-bind:src="item.channel.imageURL"
-										v-bind:alt="item.channel.title"
-									/>
-									<a v-bind:href="item.channel.link">{{item.channel.title}}</a>
-									<span> &middot; </span>
-									<span>{{displayDate(item.publishedOn)}}</span>
-									<span v-if="item.comments"> &middot; </span>
-									<a v-bind:href="item.comments" target="_blank" rel="noopener noreferrer" v-if="item.comments"
-										>Comments</a
-									>
-								</div>
-							</div>
-						</div>
-						<p v-if="items.length === 0 && !loading" class="light">No items to show</p>
-						<div v-if="loading" class="loader"></div>
-
-						<button class="link bold" v-on:click="getItems" v-if="showLoadMore">Load more &darr;</button>
-					</section> -->
-
-					<!-- <section v-if="page === 'channels'">
-						<div>
-							<form action="." v-on:submit="subscribeChannel">
-								<div class="flex">
-									<input type="url" v-model="newChannel" placeholder="Enter feed URL" id="newFeedURL" class="flex-1" />
-									<button>+</button>
-								</div>
-							</form>
-						</div>
-						<div v-for="(channel, i) in channels" v-bind:key="channel._id" class="item">
-							<div class="link">
-								<div class="row">
-									<a v-bind:href="channel.link" class="title" target="_blank" rel="noopener noreferrer"
-										>{{channel.title}}</a
-									>
-									<div class="meta light">
-										<img v-if="channel.imageURL" v-bind:src="channel.imageURL" v-bind:alt="channel.title" />
-										<a v-bind:href="channel.feedURL" target="_blank" rel="noopener noreferrer">
-											{{displayURL(channel.feedURL)}}
-										</a>
-										<span> &middot; </span>
-										<a href="javascript:void(0)" v-on:click="unsubscribeChannel(channel._id)" class="light">Remove</a>
-									</div>
-								</div>
-							</div>
-						</div>
-						<p v-if="channels.length === 0 && !loading" class="light">You are not subscribed to any channels</p>
-						<div v-if="loading" class="loader"></div>
-						<div class="card" v-if="myAccount.membershipType === 'FREE'">
-							<div>Free users are limited to only 10 channels.</div>
-							<a href="https://buymeacoffee.com/vasanthv/membership">Become a sponsor</a> for just $1/month, to unlock
-							unlimited channels.
-						</div>
-					</section> -->
 				</main>
 			</div>
 		</div>
 
 		<footer class="small light wrap">
 			<nav>
-				<a href="/sponsors">Become a sponsor</a>
+				<a href="https://github.com/vasanthv/onlie" target="_blank">Github</a>
+				<span class="separator">&middot;</span>
+				<a href="/sponsor">Sponsor</a>
 				<span class="separator">&middot;</span>
 				<a href="/terms">Terms</a>
 				<span class="separator">&middot;</span>

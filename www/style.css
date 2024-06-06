@@ -1,6 +1,6 @@
 :root {
 	--background: #ffffff;
-	--background-light: #dfdfdf;
+	--background-light: #efefef;
 	--background-yellow: #fffbda;
 	--text: #161616;
 	--text-light: #888;
@@ -190,6 +190,12 @@ section h1 {
 	overflow: hidden;
 	white-space: nowrap;
 }
+.empty {
+	text-align: center;
+	margin: 10vh auto;
+	width: 100%;
+	max-width: 20rem;
+}
 .item .title {
 	overflow-wrap: break-word;
 	word-wrap: break-word;
@@ -206,6 +212,26 @@ section h1 {
 }
 .item .meta a {
 	color: inherit;
+}
+.item .action {
+	margin: 0px;
+	background: none;
+	border: none;
+	border-radius: 50%;
+	color: var(--text);
+	font-size: 2rem;
+	line-height: 0px;
+	width: 3rem;
+	height: 3rem;
+	padding: 0px;
+}
+.item .action:before {
+	content: "×";
+	position: relative;
+	top: -0.1rem;
+}
+.item .action:hover {
+	background: var(--background-light);
 }
 
 #app-containter {
@@ -236,38 +262,11 @@ section h1 {
 #toast.success {
 	background: var(--green);
 }
-#intro .section {
-	min-height: 90vh;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-around;
+#intro .wrap {
+	margin-top: 10vh;
 }
 #intro input {
 	margin-right: 0.5rem;
-}
-#intro #flower {
-	position: fixed;
-	left: 0px;
-	right: 0px;
-	top: 0px;
-	bottom: 0px;
-	width: 100%;
-	height: 100%;
-	z-index: -1;
-}
-#intro #flower img {
-	display: block;
-	width: 100%;
-	max-width: 656px;
-	margin: auto;
-	position: absolute;
-	left: 0px;
-	right: 0px;
-	top: 0px;
-	bottom: 0px;
-}
-#intro .quote {
-	font-size: 1.5rem;
 }
 #logo {
 	display: block;
@@ -281,10 +280,9 @@ section h1 {
 	box-sizing: border-box;
 	transition: transform 0.5s;
 }
-#logo:hover,
-#logo:active {
+div#logo:hover,
+#logo.active {
 	transform: scale(1.25) rotate(90deg);
-	/*	background: var(--background-light);*/
 }
 #logo svg {
 	width: 100%;
