@@ -87,7 +87,7 @@
 						</div>
 					</section>
 
-					<section v-if="page == 'feed'">
+					<section id="feed" v-if="page == 'feed'">
 						<div v-for="(item, i) in items" v-bind:key="item._id" class="item">
 							<div class="row">
 								<a v-bind:href="item.link" target="_blank" rel="noopener noreferrer" class="title">{{item.title}}</a>

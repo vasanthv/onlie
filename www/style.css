@@ -296,6 +296,9 @@ div#logo:hover,
 	margin-right: 0.25rem;
 	max-width: none;
 }
+#feed .item .title:visited {
+	color: var(--text-light);
+}
 .loader {
 	width: 2rem;
 	height: 2rem;
