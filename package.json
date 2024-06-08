@@ -1,6 +1,6 @@
 {
 	"name": "onlie",
-	"version": "0.1.6",
+	"version": "0.1.7",
 	"description": "An ultra minimal rss reader to follow multiple sources.",
 	"main": "init.js",
 	"scripts": {
