@@ -1,6 +1,6 @@
 {
 	"name": "onlie",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"description": "An ultra minimal rss reader to follow multiple sources.",
 	"main": "init.js",
 	"scripts": {
@@ -33,6 +33,7 @@
 		"multer": "^1.4.5-lts.1",
 		"rss-parser": "^3.13.0",
 		"uuid": "^9.0.1",
-		"vue": "^3.4.25"
+		"vue": "^3.4.25",
+		"web-push": "^3.6.7"
 	}
 }
