@@ -60,7 +60,23 @@ const me = async (req, res, next) => {
 			.populate([{ path: "channels.channel", select: "link feedURL title description imageURL" }])
 			.select("email membershipType channels createdOn");
 
+		user.channels = user.channels.sort((a, b) => new Date(b.subscribedOn) - new Date(a.subscribedOn));
+
 		res.json(user);
+	} catch (error) {
+		next(error);
+	}
+};
+
+const updatePushCredentials = async (req, res, next) => {
+	try {
+		const credentials = req.body.credentials;
+
+		await Users.findOneAndUpdate(
+			{ _id: req.user._id, "devices.token": req.token },
+			{ $set: { "devices.$.pushCredentials": credentials } }
+		);
+		res.json({ message: "Push credentials updated" });
 	} catch (error) {
 		next(error);
 	}
@@ -127,6 +143,36 @@ const unsubscribeChannel = async (req, res, next) => {
 	}
 };
 
+const enableNotification = async (req, res, next) => {
+	try {
+		let channelId = req.body.channelId;
+
+		await Users.findOneAndUpdate(
+			{ _id: req.user._id, "channels.channel": channelId },
+			{ $set: { "channels.$.notification": true } }
+		);
+
+		res.json({ message: "Notifications enabled" });
+	} catch (error) {
+		next(error);
+	}
+};
+
+const disableNotification = async (req, res, next) => {
+	try {
+		let channelId = req.body.channelId;
+
+		await Users.findOneAndUpdate(
+			{ _id: req.user._id, "channels.channel": channelId },
+			{ $set: { "channels.$.notification": false } }
+		);
+
+		res.json({ message: "Notifications disabled" });
+	} catch (error) {
+		next(error);
+	}
+};
+
 const getItems = async (req, res, next) => {
 	try {
 		let user = req.user;
@@ -168,8 +214,11 @@ const logOut = async (req, res, next) => {
 module.exports = {
 	authenticate,
 	me,
+	updatePushCredentials,
 	subscribeChannel,
 	unsubscribeChannel,
+	enableNotification,
+	disableNotification,
 	getItems,
 	logOut,
 };

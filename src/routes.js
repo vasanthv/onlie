@@ -23,6 +23,9 @@ router.use(
 	})
 );
 
+// Keys for push notifications
+router.get("/meta", (req, res) => res.json({ vapidKey: config.PUSH_OPTIONS.vapidDetails.publicKey }));
+
 // Logging UI errors
 router.post("/error", (req, res) => {
 	console.error({ browserError: req.body });
@@ -52,8 +55,13 @@ router.use(utils.isUserAuthed);
 
 router.get("/me", model.me);
 
+router.put("/credentials", model.updatePushCredentials);
+
 router.post("/channels/subscribe", utils.canUserSubscribe, model.subscribeChannel);
 router.post("/channels/unsubscribe", model.unsubscribeChannel);
+
+router.put("/channels/notification/enable", model.enableNotification);
+router.put("/channels/notification/disable", model.disableNotification);
 router.get("/items", model.getItems);
 
 router.post("/logout", model.logOut);

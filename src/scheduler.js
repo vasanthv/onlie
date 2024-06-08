@@ -1,8 +1,9 @@
 const { CronJob } = require("cron");
 
-const { Channels, Items } = require("./collections").getInstance();
+const { Channels, Items, Users } = require("./collections").getInstance();
 
 const rssFetcher = require("./rss-fetcher");
+const utils = require("./utils");
 
 const fetchAndUpdateChannelItems = async (_channel) => {
 	console.log(`Fetching feed for ${_channel.feedURL}`);
@@ -10,6 +11,7 @@ const fetchAndUpdateChannelItems = async (_channel) => {
 
 	if (!success) return console.error(error, _channel.feedURL);
 
+	const newItems = await getNewItems(items);
 	const date = new Date();
 
 	const updatePromises = [];
@@ -33,8 +35,34 @@ const fetchAndUpdateChannelItems = async (_channel) => {
 		);
 	});
 
-	await Promise.all(updatePromises);
+	const responses = await Promise.all(updatePromises);
 	console.log(`Upserted ${items.length} items for ${channel.feedURL}`);
+
+	console.log({ newItems, responses });
+	// Send push notification only if there are less than 3 items, else it could be initial fetch and we don't want to send
+	// push notification in any initial fetch
+	if (newItems.length > 0 && newItems.length <= 3) {
+		const usersToBeNotified = await Users.find({ "channels.channel": _channel._id, notification: true }).exec();
+		if (usersToBeNotified.length > 0) {
+			const pushPromises = newItems.map((newItem) =>
+				utils.sendPushNotification(usersToBeNotified, _channel, newItem.title, newItem.link)
+			);
+			await Promise.all(pushPromises);
+		}
+	}
+};
+
+const getNewItems = async (items) => {
+	try {
+		let existingItems = await Items.find({ guid: { $in: items.map((i) => i.guid) } })
+			.select("guid")
+			.exec();
+		existingItems = existingItems.map((i) => i.guid);
+
+		return items.filter((item) => !existingItems.includes(item.guid));
+	} catch (err) {
+		console.error(err);
+	}
 };
 
 const initAllChannelsFetch = async () => {

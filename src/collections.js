@@ -39,7 +39,13 @@ module.exports = (() => {
 			lastUpdatedOn: Date,
 			devices: [{ token: { type: String, index: true }, userAgent: { type: String } }],
 			membershipType: { type: String, enum: ["FREE", "SPONSOR"], default: "FREE" },
-			channels: [{ channel: { type: Schema.Types.ObjectId, ref: "Channels", index: true }, subscribedOn: Date }],
+			channels: [
+				{
+					channel: { type: Schema.Types.ObjectId, ref: "Channels", index: true },
+					subscribedOn: Date,
+					notification: { type: Boolean, default: false },
+				},
+			],
 		});
 
 		const channelSchema = new Schema({

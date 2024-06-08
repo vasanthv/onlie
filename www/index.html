@@ -150,7 +150,19 @@
 												</a>
 											</div>
 										</div>
-										<button v-on:click="unsubscribeChannel(channel.channel._id)" class="action"></button>
+										<div>
+											<button
+												class="action icon-bell-off"
+												v-if="channel.notification"
+												v-on:click="disableNotification(channel.channel._id)"
+											></button>
+											<button
+												class="action icon-bell light"
+												v-if="!channel.notification"
+												v-on:click="enableNotification(channel.channel._id)"
+											></button>
+											<button v-on:click="unsubscribeChannel(channel.channel._id)" class="icon-x action"></button>
+										</div>
 									</div>
 								</div>
 							</div>

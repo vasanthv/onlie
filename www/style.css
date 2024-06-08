@@ -1,3 +1,4 @@
+@import "/icomoon/style.css";
 :root {
 	--background: #ffffff;
 	--background-light: #efefef;
@@ -219,16 +220,15 @@ section h1 {
 	border: none;
 	border-radius: 50%;
 	color: var(--text);
-	font-size: 2rem;
+	font-size: 1.5rem;
 	line-height: 0px;
 	width: 3rem;
 	height: 3rem;
 	padding: 0px;
 }
-.item .action:before {
-	content: "×";
-	position: relative;
-	top: -0.1rem;
+.item .action.icon-bell {
+	color: var(--text-light);
+	opacity: 0.8;
 }
 .item .action:hover {
 	background: var(--background-light);

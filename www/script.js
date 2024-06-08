@@ -1,6 +1,18 @@
-/* global page, axios, Vue, cabin */
+/* global  axios, Vue, cabin */
 
-const defaultState = function () {
+let swReg = null;
+const urlB64ToUint8Array = (base64String) => {
+	const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+	const base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
+	const rawData = window.atob(base64);
+	const outputArray = new Uint8Array(rawData.length);
+	for (let i = 0; i < rawData.length; ++i) {
+		outputArray[i] = rawData.charCodeAt(i);
+	}
+	return outputArray;
+};
+
+const defaultState = () => {
 	const searchParams = new URLSearchParams(window.location.search);
 	return {
 		online: navigator.onLine,
@@ -109,12 +121,35 @@ const App = Vue.createApp({
 			this.getMe();
 			this.getItems();
 		},
+		async subscribeToPush() {
+			if (swReg) {
+				try {
+					const vapidKey = (await axios.get("/api/meta")).data.vapidKey;
+					if (vapidKey) {
+						const pushSubscription = await swReg.pushManager.subscribe({
+							userVisibleOnly: true,
+							applicationServerKey: urlB64ToUint8Array(vapidKey),
+						});
+						const credentials = JSON.parse(JSON.stringify(pushSubscription));
+						await axios.put("/api/credentials", { credentials });
+					}
+					return true;
+				} catch (err) {
+					console.log(err);
+					this.setToast("Unable to enable notification, please try again.", "error");
+					return false;
+				}
+			}
+		},
 		getMe() {
 			axios.get("/api/me").then((response) => {
 				const { channels, ...me } = response.data;
 				window.localStorage.email = this.userEmail = me.email;
 				this.channels = channels;
 				this.me = me;
+				if (this.channels.some((c) => c.notification)) {
+					this.subscribeToPush();
+				}
 			});
 		},
 		getItems() {
@@ -147,6 +182,19 @@ const App = Vue.createApp({
 		},
 		unsubscribeChannel(channelId) {
 			axios.post("/api/channels/unsubscribe", { channelId }).then((response) => {
+				this.setToast(response.data.message, "success");
+				this.getMe();
+			});
+		},
+		enableNotification(channelId) {
+			axios.put("/api/channels/notification/enable", { channelId }).then((response) => {
+				this.setToast(response.data.message, "success");
+				this.subscribeToPush();
+				this.getMe();
+			});
+		},
+		disableNotification(channelId) {
+			axios.put("/api/channels/notification/disable", { channelId }).then((response) => {
 				this.setToast(response.data.message, "success");
 				this.getMe();
 			});
@@ -229,6 +277,20 @@ const App = Vue.createApp({
 	},
 }).mount("#app");
 
+const initServiceWorker = async () => {
+	if ("serviceWorker" in navigator) {
+		swReg = await navigator.serviceWorker.register("/sw.js");
+
+		navigator.serviceWorker.addEventListener("message", (event) => {
+			if (!event.data.action) return;
+			switch (event.data.action) {
+				default:
+					break;
+			}
+		});
+	}
+};
+
 window.addEventListener("online", App.setNetworkStatus);
 window.addEventListener("offline", App.setNetworkStatus);
 document.addEventListener("visibilitychange", App.setVisibility);
@@ -251,4 +313,5 @@ window.onerror = App.logError;
 		}
 	);
 	App.initApp();
+	initServiceWorker();
 })();

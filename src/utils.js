@@ -1,8 +1,9 @@
 const rateLimiter = require("express-rate-limit");
 const slowDown = require("express-slow-down");
+const webPush = require("web-push");
+const { JSDOM } = require("jsdom");
 const crypto = require("crypto");
 const { URL } = require("url");
-const { JSDOM } = require("jsdom");
 const axios = require("axios");
 
 const config = require("./config");
@@ -230,6 +231,30 @@ const getURLContents = async (url) => {
 	}
 };
 
+/* Send link as push notifications */
+const sendPushNotification = async (recipients, channel, title, url) => {
+	const payload = JSON.stringify({
+		title: channel.title,
+		body: title,
+		url,
+	});
+
+	const pushPromises = [];
+	recipients.forEach((recipient) => {
+		recipient.devices?.forEach((device) => {
+			if (device.pushCredentials) {
+				pushPromises.push(webPush.sendNotification(device.pushCredentials, payload, config.PUSH_OPTIONS));
+			}
+		});
+	});
+
+	try {
+		await Promise.all(pushPromises);
+	} catch (err) {
+		console.error(err);
+	}
+};
+
 /**
  * Throws a error which can be usernamed and changed to HTTP Error in the Express js Error handling middleware.
  * @param  {number} code - HTTP error code
@@ -260,4 +285,5 @@ module.exports = {
 	rateLimit,
 	speedLimiter,
 	findFeedURL,
+	sendPushNotification,
 };
