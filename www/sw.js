@@ -10,14 +10,14 @@ self.addEventListener("install", function (e) {
 		"/",
 		"/manifest.json",
 		"/style.css",
+		"/icomoon/style.css",
 		"/vue.global.prod.js",
 		"/axios.min.js",
-		"/page.js",
 		"/script.js",
 		"/index.html",
 		"/terms.html",
 		"/privacy.html",
-		"/icon.svg",
+		"/favicon.svg",
 	];
 
 	// Deleting the previous version of cache
