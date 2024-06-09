@@ -40,6 +40,7 @@ const fetchAndUpdateChannelItems = async (_channel) => {
 
 	// Send push notification only if there are less than 3 items, else it could be initial fetch and we don't want to send
 	// push notification in any initial fetch
+	console.log({ newItems });
 	if (newItems.length > 0 && newItems.length <= 3) {
 		const usersToBeNotified = await Users.find({ "channels.channel": _channel._id, notification: true }).exec();
 		if (usersToBeNotified.length > 0) {
