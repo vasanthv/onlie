@@ -1,11 +1,12 @@
 {
 	"name": "onlie",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"description": "An ultra minimal rss reader to follow multiple sources.",
 	"main": "init.js",
 	"scripts": {
 		"start": "node ./scripts/pre-start.js && node init.js",
 		"api-dev": "DISABLE_CSRF=true node init.js",
+		"gen:vapid": "node ./scripts/generate-vapid-keys.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [

@@ -189,7 +189,6 @@ const App = Vue.createApp({
 		enableNotification(channelId) {
 			axios.put("/api/channels/notification/enable", { channelId }).then((response) => {
 				this.setToast(response.data.message, "success");
-				this.subscribeToPush();
 				this.getMe();
 			});
 		},
