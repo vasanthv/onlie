@@ -354,5 +354,14 @@ div#logo:hover,
 		bottom: auto;
 	}
 }
-@media only screen and (max-width: 600px) {
+@media (prefers-color-scheme: dark) {
+	:root {
+		--background: #000000;
+		--background-light: #1f1f1f;
+		--background-yellow: #fbd872;
+		--text: #e6e6e6;
+	}
+	.card {
+		color: var(--background);
+	}
 }
