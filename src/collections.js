@@ -37,7 +37,13 @@ module.exports = (() => {
 			joinedOn: { type: Date, default: Date.now },
 			lastLoginOn: Date,
 			lastUpdatedOn: Date,
-			devices: [{ token: { type: String, index: true }, userAgent: { type: String } }],
+			devices: [
+				{
+					token: { type: String, index: true },
+					pushCredentials: Object, //  Push subscription data which includes push endpoint, token & auth credentials
+					userAgent: { type: String },
+				},
+			],
 			membershipType: { type: String, enum: ["FREE", "SPONSOR"], default: "FREE" },
 			channels: [
 				{
