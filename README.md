@@ -13,7 +13,7 @@ Onlie is a minimal rss/atom feed reader, that shows a single chronological feed 
 - Supports YouTube, Mastodan & Bluesky profiles.
 - No bloatware.
 - Free upto 10 channels. (Become a sponsor for just $1/month, only if you want unlimited channels).
-- Opt-in push notification on new posts (coming soon)
+- Opt-in push notification on new posts for any channel.
 
 ## LICENSE
 
