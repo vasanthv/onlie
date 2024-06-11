@@ -19,7 +19,8 @@ if (process.env.NODE_ENV === "production") {
 
 		const filesToBeTracked = [
 			"../www/index.html",
-			"../static/bookmarklet.html",
+			"../static/404.html",
+			"../static/sponsor.html",
 			"../static/privacy.html",
 			"../static/terms.html",
 		];
