@@ -37,7 +37,7 @@ const fetchAndUpdateChannelItems = async (_channel) => {
 
 	await Promise.all(updatePromises);
 	console.log(`Upserted ${items.length} items for ${channel.title}`, channel.feedURL);
-	console.log(`${newItems.length} new items where inserted for ${channel.title}`, channel.feedURL);
+	console.log(`${newItems.length} new items were inserted for ${channel.title}`, channel.feedURL);
 
 	// Send push notification only if there are less than 3 items, else it could be initial fetch and we don't want to send
 	// push notification in any initial fetch
