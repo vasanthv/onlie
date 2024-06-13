@@ -29,7 +29,7 @@ const rssFetcher = async (feedURL) => {
 			item["textContent"] = _item.contentSnippet;
 			item["author"] = _item.author;
 			item["comments"] = _item.comments;
-			item["publishedOn"] = new Date(_item.isoDate);
+			item["publishedOn"] = _item.isoDate ? new Date(_item.isoDate) : undefined;
 			return item;
 		});
 		return { success: true, channel, items };
