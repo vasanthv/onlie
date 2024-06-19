@@ -97,28 +97,6 @@ const isUserAuthed = (req, res, next) => {
 };
 
 /**
- * This is an Express js middleware to check if the user is FREE or PRO
- * Calls next when user is PRO or has less than 10 channels
- * Responds a JSON error response if otherwise
- * @param  {object}   req  - Express.js Request object. https://expressjs.com/en/5x/api.html#req
- * @param  {[type]}   res  - Express.js Response object. https://expressjs.com/en/5x/api.html#res
- * @param  {Function} next - Express.js next middleware function https://expressjs.com/en/guide/writing-middleware.html
- * @return {null}
- */
-const canUserSubscribe = async (req, res, next) => {
-	if (!req.user) return res.status(401).json({ message: "Please log in" });
-	if (req.user.membershipType === "PRO") return next();
-
-	const channels = await Channels.find({ subscribers: req.user._id }).select("title").exec();
-
-	if (channels.length < 10) return next();
-
-	res
-		.status(403)
-		.json({ message: "Please get a memebership for just $1/month at https://buymeacoffee.com/vasanthv/membership" });
-};
-
-/**
  * This is an Express js middleware to validate if the request holds a valid CSRF token
  * Calls next when the request holds a valid CSRF token
  * Responds a JSON error response if the request does not hold a valid CSRF token
@@ -280,7 +258,6 @@ module.exports = {
 	httpError,
 	attachUsertoRequest,
 	isUserAuthed,
-	canUserSubscribe,
 	csrfValidator,
 	rateLimit,
 	speedLimiter,

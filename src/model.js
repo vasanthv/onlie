@@ -58,7 +58,7 @@ const me = async (req, res, next) => {
 	try {
 		const user = await Users.findOne({ _id: req.user._id })
 			.populate([{ path: "channels.channel", select: "link feedURL title description imageURL" }])
-			.select("email membershipType channels createdOn");
+			.select("email channels createdOn");
 
 		user.channels = user.channels.sort((a, b) => new Date(b.subscribedOn) - new Date(a.subscribedOn));
 

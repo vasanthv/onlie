@@ -44,7 +44,6 @@ module.exports = (() => {
 					userAgent: { type: String },
 				},
 			],
-			membershipType: { type: String, enum: ["FREE", "SPONSOR"], default: "FREE" },
 			channels: [
 				{
 					channel: { type: Schema.Types.ObjectId, ref: "Channels", index: true },
@@ -75,7 +74,7 @@ module.exports = (() => {
 			comments: String,
 			author: String,
 			publishedOn: Date,
-			touchedOn: { type: Date, default: Date.now, expires: 30 * 86400 }, // delete 30 days after this item is removed from feed
+			touchedOn: { type: Date, default: Date.now, expires: 7 * 86400 }, // delete 7 days after this item is removed from feed
 		});
 		itemSchema.index({ title: "text", textContent: "text" });
 

@@ -57,7 +57,7 @@ router.get("/me", model.me);
 
 router.put("/credentials", model.updatePushCredentials);
 
-router.post("/channels/subscribe", utils.canUserSubscribe, model.subscribeChannel);
+router.post("/channels/subscribe", model.subscribeChannel);
 router.post("/channels/unsubscribe", model.unsubscribeChannel);
 
 router.put("/channels/notification/enable", model.enableNotification);
